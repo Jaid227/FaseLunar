@@ -1,4 +1,3 @@
-
 // ======================= DATOS REALES DE FASES ==================
 const PHASES = [
     { name: "Luna Nueva", icon: "🌑", illumination: 0, daysRange: [0, 1.5], order: 0 },
@@ -18,6 +17,27 @@ function getPhaseByDay(day) {
         if (d >= phase.daysRange[0] && d < phase.daysRange[1]) return phase;
     }
     return PHASES[0];
+}
+
+// ========== MODO CLARO / NOCTURNO ==========
+const themeToggle = document.getElementById('themeToggle');
+themeToggle.addEventListener('change', function() {
+    if (this.checked) {
+        document.body.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.body.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+    }
+});
+// Cargar tema guardado
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    themeToggle.checked = true;
+} else {
+    document.body.classList.remove('light-mode');
+    themeToggle.checked = false;
 }
 
 // ========== 1. QUIZ (preguntas reales) ==========
@@ -62,16 +82,16 @@ function handleQuizAnswer(selected) {
     const correct = quizData[quizCurrent].correct;
     if (selected === correct) {
         quizScore++;
-        document.getElementById("quizFeedback").innerHTML = "<span style='color:#a3ffa3'>✅ ¡Correcto!</span>";
+        document.getElementById("quizFeedback").innerHTML = "<span style='color:var(--feedback-correct)'>✅ ¡Correcto!</span>";
     } else {
-        document.getElementById("quizFeedback").innerHTML = `<span style='color:#ffb3a3'>❌ Incorrecto. Respuesta: ${correct}</span>`;
+        document.getElementById("quizFeedback").innerHTML = `<span style='color:var(--feedback-wrong)'>❌ Incorrecto. Respuesta: ${correct}</span>`;
     }
     document.getElementById("quizScore").innerText = quizScore;
     document.querySelectorAll(".quiz-option").forEach(btn => btn.style.pointerEvents = "none");
 }
 document.getElementById("nextQuizBtn").addEventListener("click", () => {
     if (!quizAnswered && quizCurrent < quizTotal) {
-        document.getElementById("quizFeedback").innerHTML = "<span style='color:orange'>Responde primero</span>";
+        document.getElementById("quizFeedback").innerHTML = "<span style='color:var(--feedback-warning)'>Responde primero</span>";
         return;
     }
     quizCurrent++;
@@ -86,8 +106,8 @@ const totalPairs = 8;
 function buildMemorama() {
     let deck = [];
     PHASES.forEach((phase, idx) => {
-        deck.push({ id: idx * 2, phaseId: idx, type: "icon", value: phase.icon, name: phase.name });
-        deck.push({ id: idx * 2 + 1, phaseId: idx, type: "name", value: phase.name, name: phase.name });
+        deck.push({ id: idx * 2, phaseId: idx, type: "icon", value: phase.icon, name: phase.name, matched: false, flipped: false });
+        deck.push({ id: idx * 2 + 1, phaseId: idx, type: "name", value: phase.name, name: phase.name, matched: false, flipped: false });
     });
     for (let i = deck.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -227,14 +247,13 @@ document.getElementById("guessPhaseBtn").addEventListener("click", () => {
     document.getElementById("relojFeedback").innerHTML = `🌙 Día ${day.toFixed(1)} → ${phase.name}`;
 });
 
-// ========== 5. SOPA DE LETRAS (temática fases) ==========
+// ========== 5. SOPA DE LETRAS ==========
 const words = ["NUEVA", "CRECIENTE", "CUARTO", "LLENA", "GIBOSA", "MENGUANTE"];
 let sopaGrid = [], selectedCells = [], foundWords = [];
 function generateSopa() {
     const rows = 10, cols = 10;
     sopaGrid = Array(rows).fill().map(() => Array(cols).fill(''));
     for(let i=0;i<rows;i++) for(let j=0;j<cols;j++) sopaGrid[i][j]=String.fromCharCode(65+Math.floor(Math.random()*26));
-    // insertar palabras (simplificado, se asegura presencia)
     words.forEach((word, idx) => {
         let placed = false;
         for(let intent=0;intent<100;intent++){
@@ -255,6 +274,7 @@ function generateSopa() {
     foundWords=[];
     selectedCells=[];
     document.getElementById("palabrasRestantes").innerText = words.length;
+    document.getElementById("sopaFeedback").innerHTML = "";
 }
 function renderSopa(){
     const container = document.getElementById("sopaGrid");
@@ -278,6 +298,7 @@ function toggleSelectCell(row,col){
     checkWordFound();
 }
 function checkWordFound(){
+    if(selectedCells.length === 0) return;
     let selectedStr = selectedCells.sort((a,b)=>a.col-b.col).map(c=>sopaGrid[c.row][c.col]).join('');
     let reverseStr = selectedCells.slice().reverse().map(c=>sopaGrid[c.row][c.col]).join('');
     for(let w of words){
@@ -292,7 +313,7 @@ function checkWordFound(){
         }
     }
 }
-document.getElementById("resetSopaBtn").addEventListener("click",()=>{ generateSopa(); selectedCells=[]; foundWords=[]; document.getElementById("sopaFeedback").innerHTML=""; });
+document.getElementById("resetSopaBtn").addEventListener("click",()=>{ generateSopa(); selectedCells=[]; foundWords=[]; });
 generateSopa();
 
 // ========== NAVEGACIÓN ENTRE JUEGOS ==========
