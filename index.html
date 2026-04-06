@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Aprende las Fases de la Luna - 5 Mini Juegos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <header>
+            <h1>🌙 Fases de la Luna 🌖</h1>
+            <p>Datos reales • Ciclo de 29.5 días • 8 fases principales</p>
+        </header>
+
+        <!-- Selector de juegos -->
+        <nav class="game-nav">
+            <button data-game="quiz" class="game-btn active">📝 Quiz</button>
+            <button data-game="memorama" class="game-btn">🧠 Memorama</button>
+            <button data-game="orden" class="game-btn">🔄 Orden Lunar</button>
+            <button data-game="reloj" class="game-btn">⏰ Reloj Lunar</button>
+            <button data-game="sopa" class="game-btn">🔍 Sopa de Fases</button>
+        </nav>
+
+        <!-- Contenedor de cada juego (se muestra solo uno a la vez) -->
+        <main class="game-area">
+            <!-- 1. Quiz -->
+            <div id="quizGame" class="game-panel active">
+                <h2>📋 Quiz Astronómico</h2>
+                <div class="quiz-stats">Puntuación: <span id="quizScore">0</span> / <span id="quizTotal">0</span></div>
+                <div id="quizQuestion" class="quiz-question"></div>
+                <div id="quizOptions" class="quiz-options"></div>
+                <button id="nextQuizBtn" class="action-btn">Siguiente pregunta ➡️</button>
+                <div id="quizFeedback" class="feedback"></div>
+            </div>
+
+            <!-- 2. Memorama (parejas) -->
+            <div id="memoramaGame" class="game-panel">
+                <h2>🧠 Memorama de Fases</h2>
+                <div class="memorama-stats">Parejas encontradas: <span id="pairsFound">0</span> / <span id="totalPairs">8</span></div>
+                <div class="memorama-grid" id="memoramaGrid"></div>
+                <button id="resetMemorama" class="action-btn">🔄 Reiniciar Memorama</button>
+                <div id="memoramaMsg" class="feedback"></div>
+            </div>
+
+            <!-- 3. Orden Lunar (secuencia correcta de fases) -->
+            <div id="ordenGame" class="game-panel">
+                <h2>🔄 Orden Lunar - Coloca las fases</h2>
+                <p>Arrastra o haz clic en los iconos para ordenar desde <strong>Luna Nueva</strong> hasta <strong>Luna Menguante</strong></p>
+                <div class="orden-bins">
+                    <div class="orden-bucket" id="ordenSlots"></div>
+                    <div class="orden-items" id="ordenItems"></div>
+                </div>
+                <button id="checkOrdenBtn" class="action-btn">✅ Comprobar orden</button>
+                <button id="resetOrdenBtn" class="action-btn">🔄 Reiniciar</button>
+                <div id="ordenFeedback" class="feedback"></div>
+            </div>
+
+            <!-- 4. Reloj Lunar: asociar porcentaje de iluminación y días -->
+            <div id="relojGame" class="game-panel">
+                <h2>⏰ Reloj Lunar - Fase según días transcurridos</h2>
+                <p>Dado un día del ciclo (0 a 29.5), ¿qué fase se aproxima?</p>
+                <div class="reloj-controls">
+                    <label>Día del ciclo lunar (0 = Luna Nueva): <input type="number" id="lunarDay" min="0" max="29.5" step="0.5" value="7.5"></label>
+                    <button id="guessPhaseBtn" class="action-btn">🌕 Adivinar fase 🌖</button>
+                </div>
+                <div id="relojResult" class="reloj-result"></div>
+                <div class="phase-chart">
+                    <p><small>Referencia: 0-1.5: Nueva | 1.5-5: Creciente | 5-8: Cuarto Creciente | 8-11.5: Gibosa Creciente | 11.5-18: Llena | 18-21.5: Gibosa Menguante | 21.5-25: Cuarto Menguante | 25-29.5: Menguante</small></p>
+                </div>
+                <div id="relojFeedback" class="feedback"></div>
+            </div>
+
+            <!-- 5. Sopa de Letras de Fases (conceptos) -->
+            <div id="sopaGame" class="game-panel">
+                <h2>🔍 Sopa de Fases (encuentra los nombres)</h2>
+                <p>Haz clic en las letras para marcar las palabras: <strong>NUEVA, CRECIENTE, CUARTO, LLENA, GIBOSA, MENGUANTE</strong></p>
+                <div class="sopa-grid" id="sopaGrid"></div>
+                <div class="sopa-status">Palabras restantes: <span id="palabrasRestantes">6</span></div>
+                <button id="resetSopaBtn" class="action-btn">🔄 Nueva Sopa</button>
+                <div id="sopaFeedback" class="feedback"></div>
+            </div>
+        </main>
+        <footer>🌙 Datos reales: ciclo sinódico ≈ 29.53 días • Iluminación real • Iconografía estándar</footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
