@@ -2,97 +2,2784 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Aprende las Fases de la Luna - 5 Mini Juegos + Modo Claro/Nocturno</title>
-    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fases de la Luna: Astronomía, Cultivos y Bienestar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* ==========================================================================
+           1. VARIABLES DE DISEÑO Y TEMAS (MODO NOCTURNO Y MODO CLARO)
+           ========================================================================== */
+        :root {
+            /* Modo Nocturno (Observatorio Astronómico - Predeterminado) */
+            --bg-primary: #060918;
+            --bg-secondary: #0d132b;
+            --bg-glass: rgba(16, 23, 52, 0.78);
+            --bg-card: rgba(24, 34, 74, 0.85);
+            --bg-card-hover: rgba(34, 48, 102, 0.95);
+            --bg-input: #111836;
+            --text-primary: #f4f1ea;
+            --text-secondary: #b8c2e0;
+            --text-muted: #7c89b3;
+            --accent-gold: #f5c35b;
+            --accent-gold-glow: rgba(245, 195, 91, 0.35);
+            --accent-blue: #4ea8de;
+            --accent-emerald: #34d399;
+            --accent-rose: #fb7185;
+            --accent-purple: #a78bfa;
+            --border-subtle: rgba(245, 195, 91, 0.22);
+            --border-strong: rgba(245, 195, 91, 0.55);
+            --shadow-elevated: 0 20px 50px rgba(0, 0, 0, 0.65);
+            --star-opacity: 0.85;
+            --moon-shadow-color: #0b1024;
+            --moon-lit-color: #f6eedc;
+        }
+
+        body.light-mode {
+            /* Modo Claro (Pergamino Científico y Cielo Diurno) */
+            --bg-primary: #f3efe6;
+            --bg-secondary: #e6dfd1;
+            --bg-glass: rgba(255, 252, 245, 0.88);
+            --bg-card: rgba(255, 255, 255, 0.92);
+            --bg-card-hover: #fff9eb;
+            --bg-input: #f7f3e8;
+            --text-primary: #1e2436;
+            --text-secondary: #434d66;
+            --text-muted: #6c7791;
+            --accent-gold: #c98316;
+            --accent-gold-glow: rgba(201, 131, 22, 0.22);
+            --accent-blue: #0284c7;
+            --accent-emerald: #059669;
+            --accent-rose: #e11d48;
+            --accent-purple: #7c3aed;
+            --border-subtle: rgba(30, 36, 54, 0.14);
+            --border-strong: rgba(201, 131, 22, 0.55);
+            --shadow-elevated: 0 18px 40px rgba(30, 36, 54, 0.12);
+            --star-opacity: 0.08;
+            --moon-shadow-color: #242b42;
+            --moon-lit-color: #fff8e7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at top center, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            transition: background 0.4s ease, color 0.3s ease;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Fondo de estrellas sutiles */
+        #starfield {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            opacity: var(--star-opacity);
+            transition: opacity 0.5s ease;
+        }
+
+        .app-wrapper {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ==========================================================================
+           2. ENCABEZADO Y CONTROLES GLOBALES
+           ========================================================================== */
+        header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 24px;
+            padding: 18px 24px;
+            margin-bottom: 18px;
+            box-shadow: var(--shadow-elevated);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-area {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-moon {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            filter: drop-shadow(0 0 12px var(--accent-gold-glow));
+        }
+
+        .brand-text h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+            color: var(--accent-gold);
+            letter-spacing: 0.5px;
+            line-height: 1.2;
+        }
+
+        .brand-text p {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .badge-medals {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent-gold);
+        }
+
+        .icon-toggle-btn {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 9px 14px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .icon-toggle-btn:hover {
+            border-color: var(--accent-gold);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px var(--accent-gold-glow);
+        }
+
+        /* ==========================================================================
+           3. NAVEGACIÓN DE SECCIONES Y MINIJUEGOS
+           ========================================================================== */
+        .main-nav {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 6px 4px 12px;
+            margin-bottom: 12px;
+            scrollbar-width: thin;
+        }
+
+        .nav-tab {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 11px 18px;
+            border-radius: 16px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .nav-tab:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, var(--accent-gold), #e09f24);
+            color: #131726;
+            border-color: transparent;
+            box-shadow: 0 6px 20px var(--accent-gold-glow);
+        }
+
+        .medal-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-emerald);
+        }
+
+        /* ==========================================================================
+           4. CONTENEDOR PRINCIPAL DE PANELES
+           ========================================================================== */
+        main {
+            flex: 1;
+            background: var(--bg-glass);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 26px;
+            padding: clamp(16px, 3vw, 28px);
+            box-shadow: var(--shadow-elevated);
+        }
+
+        .panel {
+            display: none;
+            animation: panelFadeIn 0.35s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes panelFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .panel-header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .panel-header h2 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+            color: var(--accent-gold);
+        }
+
+        .panel-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+        }
+
+        /* Botones generales */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-gold), #dfa028);
+            color: #121624;
+            border: none;
+            padding: 11px 22px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px var(--accent-gold-glow);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.06);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-subtle);
+            padding: 10px 18px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-gold);
+            background: var(--bg-card-hover);
+        }
+
+        /* ==========================================================================
+           5. SECCIÓN 1: EXPLORADOR ORBITAL Y ENCICLOPEDIA
+           ========================================================================== */
+        .explorer-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 1.25fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 960px) {
+            .explorer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .orbital-stage {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 22px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .orbital-visuals {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            width: 100%;
+            align-items: center;
+        }
+
+        @media (max-width: 520px) {
+            .orbital-visuals {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .orbit-box, .earth-view-box {
+            background: rgba(6, 9, 24, 0.55);
+            border: 1px solid var(--border-subtle);
+            border-radius: 18px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        body.light-mode .orbit-box,
+        body.light-mode .earth-view-box {
+            background: rgba(24, 32, 56, 0.92);
+            color: #f4f1ea;
+        }
+
+        .view-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #b8c2e0;
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .slider-box {
+            width: 100%;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 14px 18px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #2b355e, var(--accent-gold), #2b355e);
+            outline: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--accent-gold);
+            border: 3px solid #fff;
+            box-shadow: 0 0 12px var(--accent-gold);
+            cursor: grab;
+        }
+
+        .phase-pills {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            width: 100%;
+        }
+
+        @media (max-width: 560px) {
+            .phase-pills {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .phase-pill {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            border-radius: 12px;
+            padding: 8px 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .phase-pill:hover, .phase-pill.active {
+            border-color: var(--accent-gold);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .phase-pill.active {
+            box-shadow: 0 0 0 2px var(--accent-gold-glow);
+        }
+
+        /* Ficha Enciclopédica de 3 Pilares */
+        .encyclopedia-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 22px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .phase-title-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .phase-title-banner h3 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.45rem;
+            color: var(--accent-gold);
+        }
+
+        .metrics-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .metric-chip {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .pillar-box {
+            background: var(--bg-input);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 14px;
+            padding: 14px 16px;
+        }
+
+        .pillar-box.agri {
+            border-left-color: var(--accent-emerald);
+        }
+
+        .pillar-box.body {
+            border-left-color: var(--accent-purple);
+        }
+
+        .pillar-box h4 {
+            font-size: 0.98rem;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pillar-box p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .science-note {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 6px;
+        }
+
+        /* ==========================================================================
+           6. MODO 1: QUIZ ASTRONÓMICO Y BIO-LUNAR
+           ========================================================================== */
+        .quiz-container {
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .quiz-topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+            background: var(--bg-card);
+            padding: 12px 18px;
+            border-radius: 16px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        .quiz-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 22px;
+            padding: 24px;
+        }
+
+        .quiz-category-tag {
+            display: inline-block;
+            background: rgba(78, 168, 222, 0.18);
+            color: var(--accent-blue);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .quiz-q-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .quiz-options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-options-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quiz-opt-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            padding: 14px 16px;
+            border-radius: 14px;
+            text-align: left;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .quiz-opt-btn:hover:not(:disabled) {
+            border-color: var(--accent-gold);
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+        }
+
+        .quiz-opt-btn.correct {
+            background: rgba(52, 211, 153, 0.22);
+            border-color: var(--accent-emerald);
+            color: var(--accent-emerald);
+        }
+
+        .quiz-opt-btn.wrong {
+            background: rgba(251, 113, 133, 0.22);
+            border-color: var(--accent-rose);
+            color: var(--accent-rose);
+        }
+
+        .feedback-banner {
+            margin-top: 18px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            font-size: 0.92rem;
+            display: none;
+        }
+
+        .feedback-banner.show {
+            display: block;
+            animation: panelFadeIn 0.25s ease;
+        }
+
+        /* ==========================================================================
+           7. MODO 2: MEMORAMA LUNAR 3D FLIP
+           ========================================================================== */
+        .memo-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            max-width: 760px;
+            margin: 18px auto;
+        }
+
+        @media (max-width: 540px) {
+            .memo-grid {
+                gap: 8px;
+            }
+        }
+
+        .memo-card {
+            aspect-ratio: 3 / 3.4;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .memo-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            transform-style: preserve-3d;
+        }
+
+        .memo-card.flipped .memo-inner,
+        .memo-card.matched .memo-inner {
+            transform: rotateY(180deg);
+        }
+
+        .memo-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            text-align: center;
+            border: 1px solid var(--border-subtle);
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
+
+        .memo-front {
+            background: linear-gradient(145deg, #1b254f, #101633);
+            color: var(--accent-gold);
+            font-size: 1.8rem;
+        }
+
+        body.light-mode .memo-front {
+            background: linear-gradient(145deg, #2d3866, #1d2547);
+        }
+
+        .memo-back {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            transform: rotateY(180deg);
+            border-color: var(--accent-gold);
+        }
+
+        .memo-card.matched .memo-back {
+            border-color: var(--accent-emerald);
+            box-shadow: 0 0 16px rgba(52, 211, 153, 0.35);
+        }
+
+        .memo-back-title {
+            font-weight: 700;
+            font-size: clamp(0.75rem, 1.8vw, 0.92rem);
+            color: var(--accent-gold);
+        }
+
+        .memo-back-sub {
+            font-size: clamp(0.65rem, 1.4vw, 0.78rem);
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* ==========================================================================
+           8. MODO 3: ORDEN DEL CICLO LUNAR (DRAG & CLICK)
+           ========================================================================== */
+        .order-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 720px) {
+            .order-slots-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .order-slot {
+            background: var(--bg-input);
+            border: 2px dashed var(--border-subtle);
+            border-radius: 16px;
+            min-height: 112px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .order-slot.drag-over {
+            border-color: var(--accent-gold);
+            background: var(--bg-card-hover);
+        }
+
+        .order-slot.filled {
+            border-style: solid;
+            background: var(--bg-card);
+        }
+
+        .order-slot.valid {
+            border-color: var(--accent-emerald);
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.3);
+        }
+
+        .order-slot.invalid {
+            border-color: var(--accent-rose);
+            box-shadow: 0 0 12px rgba(251, 113, 133, 0.3);
+        }
+
+        .slot-num {
+            position: absolute;
+            top: 6px;
+            left: 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .order-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background: var(--bg-card);
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid var(--border-subtle);
+            min-height: 90px;
+        }
+
+        .order-chip {
+            background: var(--bg-input);
+            border: 1px solid var(--border-strong);
+            border-radius: 14px;
+            padding: 8px 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: grab;
+            transition: transform 0.15s ease;
+        }
+
+        .order-chip:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-gold);
+        }
+
+        /* ==========================================================================
+           9. MODO 4: HUERTO LUNAR (SIMULADOR DE CULTIVOS)
+           ========================================================================== */
+        .garden-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 820px) {
+            .garden-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .garden-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .crop-mission-box {
+            background: var(--bg-input);
+            border: 1px solid var(--accent-emerald);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .crop-emoji-stage {
+            font-size: 3.2rem;
+            width: 72px;
+            height: 72px;
+            background: rgba(52, 211, 153, 0.14);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .crop-emoji-stage.bloom {
+            transform: scale(1.18) rotate(5deg);
+        }
+
+        .sap-indicator {
+            background: var(--bg-input);
+            border-radius: 14px;
+            padding: 12px 16px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* ==========================================================================
+           10. MODO 5: CRONOBIOLOGÍA Y CUERPO HUMANO
+           ========================================================================== */
+        .bio-scenario-card {
+            max-width: 820px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 22px;
+            padding: 24px;
+        }
+
+        .bio-phases-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 640px) {
+            .bio-phases-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .bio-choice-btn {
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-primary);
+            border-radius: 14px;
+            padding: 12px 8px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .bio-choice-btn:hover:not(:disabled) {
+            border-color: var(--accent-purple);
+            transform: translateY(-2px);
+        }
+
+        /* ==========================================================================
+           11. MODO 6: SOPA DE LETRAS LUNAR INTERACTIVA
+           ========================================================================== */
+        .sopa-wrapper {
+            display: grid;
+            grid-template-columns: 1.2fr 0.9fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        @media (max-width: 820px) {
+            .sopa-wrapper {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sopa-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 5px;
+            background: var(--bg-card);
+            padding: 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
+            user-select: none;
+            touch-action: none;
+            max-width: 480px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .sopa-cell {
+            aspect-ratio: 1 / 1;
+            background: var(--bg-input);
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: clamp(0.85rem, 2.2vw, 1.1rem);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: background 0.12s ease, transform 0.1s ease;
+        }
+
+        .sopa-cell.selecting {
+            background: var(--accent-gold);
+            color: #121624;
+            transform: scale(0.94);
+        }
+
+        .sopa-cell.found {
+            color: #121624;
+            font-weight: 800;
+        }
+
+        .word-list-panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 18px;
+        }
+
+        .word-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 12px 0;
+        }
+
+        .word-chip {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            background: var(--bg-input);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+        }
+
+        .word-chip.done {
+            text-decoration: line-through;
+            opacity: 0.75;
+            color: #121624;
+        }
+
+        /* ==========================================================================
+           12. PIE DE PÁGINA OBLIGATORIO
+           ========================================================================== */
+        footer {
+            margin-top: 24px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 18px 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .footer-info {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .mandatory-credit-link {
+            display: inline-block;
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--accent-gold);
+            text-decoration: none;
+            padding: 8px 18px;
+            border-radius: 999px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-strong);
+            transition: all 0.25s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .mandatory-credit-link:hover {
+            background: var(--accent-gold);
+            color: #121624;
+            box-shadow: 0 0 20px var(--accent-gold-glow);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
 <body>
-    <div class="app-container">
+    <!-- Lienzo de estrellas sutiles -->
+    <canvas id="starfield"></canvas>
+
+    <div class="app-wrapper">
+        <!-- ENCABEZADO -->
         <header>
-            <div class="header-top">
-                <h1>🌙 Fases de la Luna 🌖</h1>
-                <div class="theme-switch-wrapper">
-                    <span class="theme-icon">☀️</span>
-                    <label class="theme-switch">
-                        <input type="checkbox" id="themeToggle">
-                        <span class="slider round"></span>
-                    </label>
-                    <span class="theme-icon">🌙</span>
+            <div class="brand-area">
+                <div class="brand-moon" id="headerMoonIcon"></div>
+                <div class="brand-text">
+                    <h1>Fases de la Luna: Astronomía, Cultivos y Bienestar</h1>
+                    <p>Observatorio Interactivo • Ciclo Sinódico Real (29.53 días) • Ciencia y Saberes Agrícolas</p>
                 </div>
             </div>
-            <p>Datos reales • Ciclo de 29.5 días • 8 fases principales</p>
+
+            <div class="header-controls">
+                <div class="badge-medals" title="Medallas obtenidas en los minijuegos">
+                    <span>🏆 Logros:</span>
+                    <span id="medalCount">0 / 6</span>
+                </div>
+                <button id="soundToggleBtn" class="icon-toggle-btn" aria-label="Activar o silenciar sonido">
+                    <span id="soundIcon">🔊</span>
+                    <span id="soundLabel">Sonido</span>
+                </button>
+                <button id="themeToggleBtn" class="icon-toggle-btn" aria-label="Cambiar modo claro o nocturno">
+                    <span id="themeIcon">☀️</span>
+                    <span id="themeLabel">Modo Claro</span>
+                </button>
+            </div>
         </header>
 
-        <!-- Selector de juegos -->
-        <nav class="game-nav">
-            <button data-game="quiz" class="game-btn active">📝 Quiz</button>
-            <button data-game="memorama" class="game-btn">🧠 Memorama</button>
-            <button data-game="orden" class="game-btn">🔄 Orden Lunar</button>
-            <button data-game="reloj" class="game-btn">⏰ Reloj Lunar</button>
-            <button data-game="sopa" class="game-btn">🔍 Sopa de Fases</button>
+        <!-- NAVEGACIÓN PRINCIPAL -->
+        <nav class="main-nav" role="tablist">
+            <button class="nav-tab active" data-panel="explorer">🔭 Explorador Orbital</button>
+            <button class="nav-tab" data-panel="quiz">📝 Quiz Bio-Lunar <span class="medal-dot" id="dot-quiz" style="display:none"></span></button>
+            <button class="nav-tab" data-panel="memorama">🧠 Memorama Lunar <span class="medal-dot" id="dot-memorama" style="display:none"></span></button>
+            <button class="nav-tab" data-panel="orden">🔄 Orden del Ciclo <span class="medal-dot" id="dot-orden" style="display:none"></span></button>
+            <button class="nav-tab" data-panel="huerto">🌱 Huerto Lunar <span class="medal-dot" id="dot-huerto" style="display:none"></span></button>
+            <button class="nav-tab" data-panel="cuerpo">🧘 Cronobiología <span class="medal-dot" id="dot-cuerpo" style="display:none"></span></button>
+            <button class="nav-tab" data-panel="sopa">🔍 Sopa Lunar <span class="medal-dot" id="dot-sopa" style="display:none"></span></button>
         </nav>
 
-        <!-- Contenedor de cada juego (se muestra solo uno a la vez) -->
-        <main class="game-area">
-            <!-- 1. Quiz -->
-            <div id="quizGame" class="game-panel active">
-                <h2>📋 Quiz Astronómico</h2>
-                <div class="quiz-stats">Puntuación: <span id="quizScore">0</span> / <span id="quizTotal">0</span></div>
-                <div id="quizQuestion" class="quiz-question"></div>
-                <div id="quizOptions" class="quiz-options"></div>
-                <button id="nextQuizBtn" class="action-btn">Siguiente pregunta ➡️</button>
-                <div id="quizFeedback" class="feedback"></div>
-            </div>
-
-            <!-- 2. Memorama (parejas) -->
-            <div id="memoramaGame" class="game-panel">
-                <h2>🧠 Memorama de Fases</h2>
-                <div class="memorama-stats">Parejas encontradas: <span id="pairsFound">0</span> / <span id="totalPairs">8</span></div>
-                <div class="memorama-grid" id="memoramaGrid"></div>
-                <button id="resetMemorama" class="action-btn">🔄 Reiniciar Memorama</button>
-                <div id="memoramaMsg" class="feedback"></div>
-            </div>
-
-            <!-- 3. Orden Lunar (secuencia correcta de fases) -->
-            <div id="ordenGame" class="game-panel">
-                <h2>🔄 Orden Lunar - Coloca las fases</h2>
-                <p>Arrastra o haz clic en los iconos para ordenar desde <strong>Luna Nueva</strong> hasta <strong>Luna Menguante</strong></p>
-                <div class="orden-bins">
-                    <div class="orden-bucket" id="ordenSlots"></div>
-                    <div class="orden-items" id="ordenItems"></div>
+        <!-- CONTENIDO PRINCIPAL -->
+        <main>
+            <!-- =================================================================
+                 SECCIÓN 1: EXPLORADOR ORBITAL Y ENCICLOPEDIA
+                 ================================================================= -->
+            <section id="panel-explorer" class="panel active">
+                <div class="panel-header">
+                    <div>
+                        <h2>🔭 Explorador Orbital y Enciclopedia Lunar</h2>
+                        <p class="panel-subtitle">Desliza el día del ciclo sinódico (0 a 29.53 días) para observar la geometría Sol-Tierra-Luna y su impacto real.</p>
+                    </div>
                 </div>
-                <button id="checkOrdenBtn" class="action-btn">✅ Comprobar orden</button>
-                <button id="resetOrdenBtn" class="action-btn">🔄 Reiniciar</button>
-                <div id="ordenFeedback" class="feedback"></div>
-            </div>
 
-            <!-- 4. Reloj Lunar: asociar porcentaje de iluminación y días -->
-            <div id="relojGame" class="game-panel">
-                <h2>⏰ Reloj Lunar - Fase según días transcurridos</h2>
-                <p>Dado un día del ciclo (0 a 29.5), ¿qué fase se aproxima?</p>
-                <div class="reloj-controls">
-                    <label>Día del ciclo lunar (0 = Luna Nueva): <input type="number" id="lunarDay" min="0" max="29.5" step="0.5" value="7.5"></label>
-                    <button id="guessPhaseBtn" class="action-btn">🌕 Adivinar fase 🌖</button>
-                </div>
-                <div id="relojResult" class="reloj-result"></div>
-                <div class="phase-chart">
-                    <p><small>Referencia: 0-1.5: Nueva | 1.5-5: Creciente | 5-8: Cuarto Creciente | 8-11.5: Gibosa Creciente | 11.5-18: Llena | 18-21.5: Gibosa Menguante | 21.5-25: Cuarto Menguante | 25-29.5: Menguante</small></p>
-                </div>
-                <div id="relojFeedback" class="feedback"></div>
-            </div>
+                <div class="explorer-grid">
+                    <!-- Columna Izquierda: Simulador Visual -->
+                    <div class="orbital-stage">
+                        <div class="orbital-visuals">
+                            <!-- Vista Orbital Superior -->
+                            <div class="orbit-box">
+                                <span class="view-label">Vista Orbital (Desde el Polo Norte)</span>
+                                <svg id="orbitSvg" viewBox="0 0 240 210" width="100%" height="190" aria-label="Diagrama orbital Sol Tierra Luna">
+                                    <!-- Rayos solares desde la izquierda -->
+                                    <defs>
+                                        <linearGradient id="sunRays" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="#f5c35b" stop-opacity="0.45"/>
+                                            <stop offset="100%" stop-color="#f5c35b" stop-opacity="0"/>
+                                        </linearGradient>
+                                    </defs>
+                                    <rect x="0" y="15" width="90" height="180" fill="url(#sunRays)"/>
+                                    <text x="10" y="26" fill="#f5c35b" font-size="10" font-weight="bold">☀️ LUZ SOLAR →</text>
+                                    <!-- Órbita lunar -->
+                                    <circle cx="145" cy="105" r="68" fill="none" stroke="rgba(245,195,91,0.3)" stroke-dasharray="4 4" stroke-width="1.5"/>
+                                    <!-- Elipse de marea alrededor de la Tierra -->
+                                    <ellipse id="tideEllipse" cx="145" cy="105" rx="28" ry="22" fill="rgba(78,168,222,0.22)" stroke="#4ea8de" stroke-width="1"/>
+                                    <!-- Tierra -->
+                                    <circle cx="145" cy="105" r="15" fill="#2563eb"/>
+                                    <path d="M145,90 A15,15 0 0,0 145,120 Z" fill="#60a5fa"/>
+                                    <text x="145" y="133" text-anchor="middle" fill="#b8c2e0" font-size="9" font-weight="bold">Tierra</text>
+                                    <!-- Luna en órbita -->
+                                    <g id="orbitMoonGroup" transform="translate(77, 105)">
+                                        <circle cx="0" cy="0" r="9" fill="#1e293b" stroke="#f5c35b" stroke-width="1"/>
+                                        <path d="M0,-9 A9,9 0 0,0 0,9 Z" fill="#f6eedc"/>
+                                    </g>
+                                </svg>
+                            </div>
 
-            <!-- 5. Sopa de Letras de Fases (conceptos) -->
-            <div id="sopaGame" class="game-panel">
-                <h2>🔍 Sopa de Fases (encuentra los nombres)</h2>
-                <p>Haz clic en las letras para marcar las palabras: <strong>NUEVA, CRECIENTE, CUARTO, LLENA, GIBOSA, MENGUANTE</strong></p>
-                <div class="sopa-grid" id="sopaGrid"></div>
-                <div class="sopa-status">Palabras restantes: <span id="palabrasRestantes">6</span></div>
-                <button id="resetSopaBtn" class="action-btn">🔄 Nueva Sopa</button>
-                <div id="sopaFeedback" class="feedback"></div>
-            </div>
+                            <!-- Vista desde la Tierra -->
+                            <div class="earth-view-box">
+                                <span class="view-label">Vista desde la Tierra (Hemisferio Norte)</span>
+                                <div id="liveMoonSvgContainer" style="width: 145px; height: 145px; margin: 8px 0;"></div>
+                                <div id="liveAngleText" style="font-size: 0.78rem; color: #f5c35b; font-weight: 700;">Elongación: 0° • Edad: 0.0 d</div>
+                            </div>
+                        </div>
+
+                        <!-- Control deslizante -->
+                        <div class="slider-box">
+                            <div class="slider-header">
+                                <span>Día del Ciclo: <strong id="sliderDayVal" style="color: var(--accent-gold);">0.0</strong> / 29.53</span>
+                                <span>Iluminación: <strong id="sliderIllumVal" style="color: var(--accent-emerald);">0%</strong></span>
+                            </div>
+                            <input type="range" id="cycleSlider" min="0" max="29.53" step="0.1" value="0">
+                        </div>
+
+                        <!-- Botones directos de las 8 fases -->
+                        <div class="phase-pills" id="explorerPhasePills"></div>
+                    </div>
+
+                    <!-- Columna Derecha: Ficha Científica de 3 Pilares -->
+                    <div class="encyclopedia-card" id="encyclopediaContent"></div>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 SECCIÓN 2: MODO 1 - QUIZ ASTRONÓMICO Y BIO-LUNAR
+                 ================================================================= -->
+            <section id="panel-quiz" class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>📝 Quiz Astronómico y Bio-Lunar</h2>
+                        <p class="panel-subtitle">Pon a prueba tus conocimientos sobre astronomía real, mareas, agricultura y cronobiología.</p>
+                    </div>
+                    <button class="btn-secondary" id="restartQuizBtn">🔄 Reiniciar Quiz</button>
+                </div>
+
+                <div class="quiz-container">
+                    <div class="quiz-topbar">
+                        <span>Pregunta: <strong id="quizProgress">1 / 12</strong></span>
+                        <span>Aciertos: <strong id="quizScoreDisplay" style="color: var(--accent-emerald);">0</strong></span>
+                        <span>Racha: <strong id="quizStreakDisplay" style="color: var(--accent-gold);">0 🔥</strong></span>
+                    </div>
+
+                    <div class="quiz-card" id="quizBody">
+                        <span class="quiz-category-tag" id="quizCategory">Astronomía</span>
+                        <div class="quiz-q-text" id="quizQuestionText">Cargando pregunta...</div>
+                        <div class="quiz-options-grid" id="quizOptionsGrid"></div>
+                        <div class="feedback-banner" id="quizFeedbackBox"></div>
+                        <div style="margin-top: 18px; display: flex; justify-content: flex-end;">
+                            <button class="btn-primary" id="quizNextBtn" style="display: none;">Siguiente Pregunta ➡️</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 SECCIÓN 3: MODO 2 - MEMORAMA LUNAR 3D
+                 ================================================================= -->
+            <section id="panel-memorama" class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>🧠 Memorama Lunar 3D</h2>
+                        <p class="panel-subtitle">Empareja la ilustración realista de cada fase lunar con su nombre y característica clave.</p>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                        <span class="metric-chip">Parejas: <strong id="memoPairs">0 / 8</strong></span>
+                        <span class="metric-chip">Movimientos: <strong id="memoMoves">0</strong></span>
+                        <span class="metric-chip">Tiempo: <strong id="memoTimer">00:00</strong></span>
+                        <button class="btn-secondary" id="resetMemoBtn">🔄 Reiniciar</button>
+                    </div>
+                </div>
+
+                <div class="memo-grid" id="memoGrid"></div>
+                <div class="feedback-banner" id="memoVictoryBanner" style="max-width: 760px; margin: 14px auto; text-align: center;"></div>
+            </section>
+
+            <!-- =================================================================
+                 SECCIÓN 4: MODO 3 - ORDEN DEL CICLO LUNAR
+                 ================================================================= -->
+            <section id="panel-orden" class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>🔄 Orden del Ciclo Lunar</h2>
+                        <p class="panel-subtitle">Arrastra o haz clic en cada fase para ordenarlas cronológicamente desde Luna Nueva (Día 0) hasta Menguante Cóncava (Día 28).</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-secondary" id="hintOrdenBtn">💡 Pista</button>
+                        <button class="btn-secondary" id="resetOrdenBtn">🔄 Mezclar</button>
+                        <button class="btn-primary" id="checkOrdenBtn">✅ Comprobar Orden</button>
+                    </div>
+                </div>
+
+                <div class="order-slots-grid" id="orderSlotsGrid"></div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px; font-weight: 600;">Fases disponibles (haz clic o arrastra hacia las casillas):</p>
+                <div class="order-bank" id="orderBank"></div>
+                <div class="feedback-banner" id="ordenFeedback"></div>
+            </section>
+
+            <!-- =================================================================
+                 SECCIÓN 5: MODO 4 - HUERTO LUNAR (SIMULADOR DE CULTIVOS)
+                 ================================================================= -->
+            <section id="panel-huerto" class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>🌱 Huerto Lunar: Simulador de Savia y Cultivos</h2>
+                        <p class="panel-subtitle">Ajusta el ciclo lunar hasta la fase óptima donde la dinámica de la savia favorece cada labor agrícola.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="metric-chip">Cosechas Exitosas: <strong id="gardenScore" style="color: var(--accent-emerald);">0 / 6</strong></span>
+                        <button class="btn-secondary" id="resetGardenBtn">🔄 Nuevo Ciclo</button>
+                    </div>
+                </div>
+
+                <div class="garden-layout">
+                    <!-- Panel de Misión Agrícola -->
+                    <div class="garden-card">
+                        <span class="quiz-category-tag" style="background: rgba(52, 211, 153, 0.18); color: var(--accent-emerald); align-self: flex-start;">Labor Agrícola Actual</span>
+                        <div class="crop-mission-box">
+                            <div class="crop-emoji-stage" id="cropVisualEmoji">🥕</div>
+                            <div>
+                                <h3 id="cropTitle" style="font-size: 1.15rem; color: var(--accent-gold);">Siembra de Zanahorias y Rábanos</h3>
+                                <p id="cropDesc" style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 4px;">Necesitamos que la savia descienda y se concentre en las raíces subterráneas para lograr bulbos firmes y dulces.</p>
+                            </div>
+                        </div>
+
+                        <div class="sap-indicator">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px;">
+                                <span>Flujo de Savia en la Fase Seleccionada:</span>
+                                <span id="gardenSelectedPhaseName" style="color: var(--accent-gold);">Luna Nueva</span>
+                            </div>
+                            <p id="gardenSapDesc" style="font-size: 0.86rem; color: var(--text-secondary);">Savia concentrada en el sistema radicular; mínimo crecimiento aéreo.</p>
+                        </div>
+
+                        <button class="btn-primary" id="plantCropBtn">🌿 Ejecutar Labor en Esta Fase</button>
+                        <div class="feedback-banner" id="gardenFeedback"></div>
+                    </div>
+
+                    <!-- Rueda/Control Lunar del Huerto -->
+                    <div class="garden-card" style="align-items: center; justify-content: center;">
+                        <div id="gardenMoonSvg" style="width: 150px; height: 150px;"></div>
+                        <div class="slider-box">
+                            <div class="slider-header">
+                                <span>Día Lunar: <strong id="gardenDayVal">0.0</strong> d</span>
+                                <span>Iluminación: <strong id="gardenIllumVal">0%</strong></span>
+                            </div>
+                            <input type="range" id="gardenSlider" min="0" max="29.53" step="0.1" value="0">
+                        </div>
+                        <div class="phase-pills" id="gardenQuickPills"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 SECCIÓN 6: MODO 5 - CRONOBIOLOGÍA Y CUERPO HUMANO
+                 ================================================================= -->
+            <section id="panel-cuerpo" class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>🧘 Cronobiología y Bienestar Humano</h2>
+                        <p class="panel-subtitle">Relaciona fenómenos fisiológicos, ritmos circalunares y prácticas de bienestar con su fase lunar correspondiente.</p>
+                    </div>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span class="metric-chip">Reto: <strong id="bioProgress">1 / 6</strong></span>
+                        <span class="metric-chip">Aciertos: <strong id="bioScore" style="color: var(--accent-emerald);">0</strong></span>
+                        <button class="btn-secondary" id="resetBioBtn">🔄 Reiniciar</button>
+                    </div>
+                </div>
+
+                <div class="bio-scenario-card">
+                    <span class="quiz-category-tag" style="background: rgba(167, 139, 250, 0.18); color: var(--accent-purple);">Escenario Fisiológico y de Bienestar</span>
+                    <h3 id="bioScenarioTitle" style="font-size: 1.2rem; margin: 10px 0;">Cargando escenario...</h3>
+                    <p id="bioScenarioContext" style="color: var(--text-secondary); font-size: 0.94rem;">Selecciona cuál de las 8 fases lunares está asociada a este fenómeno:</p>
+
+                    <div class="bio-phases-grid" id="bioChoicesGrid"></div>
+
+                    <div class="feedback-banner" id="bioFeedback"></div>
+                    <div style="margin-top: 16px; display: flex; justify-content: flex-end;">
+                        <button class="btn-primary" id="nextBioBtn" style="display: none;">Siguiente Escenario ➡️</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- =================================================================
+                 SECCIÓN 7: MODO 6 - SOPA DE LETRAS LUNAR
+                 ================================================================= -->
+            <section id="panel-sopa" class="panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>🔍 Sopa de Letras Astronómica y Agrícola</h2>
+                        <p class="panel-subtitle">Arrastra sobre las letras (horizontal, vertical o diagonal) o haz clic en la primera y última letra de cada palabra.</p>
+                    </div>
+                    <button class="btn-secondary" id="resetSopaBtn">🔄 Generar Nueva Sopa</button>
+                </div>
+
+                <div class="sopa-wrapper">
+                    <div class="sopa-board" id="sopaBoard"></div>
+
+                    <div class="word-list-panel">
+                        <h3 style="font-size: 1.05rem; color: var(--accent-gold);">Palabras por Descubrir (<span id="sopaFoundCount">0</span>/8)</h3>
+                        <div class="word-chips" id="sopaWordChips"></div>
+                        <div class="feedback-banner show" id="sopaDefinitionBox" style="margin-top: 12px;">
+                            💡 Encuentra una palabra en la cuadrícula para desbloquear su definición científica.
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
-        <footer>🌙 Datos reales: ciclo sinódico ≈ 29.53 días • Iluminación real • Iconografía estándar</footer>
+
+        <!-- PIE DE PÁGINA OBLIGATORIO -->
+        <footer>
+            <p class="footer-info">Ciclo sinódico medio: 29 días, 12 horas, 44 minutos y 3 segundos (29.53059 días) • Simulación astronómica educativa.</p>
+            <a href="https://jaid227.github.io/EntropiaDigital/" target="_blank" rel="noopener noreferrer" class="mandatory-credit-link">
+                → © 2026 Mandrágora Entrópica | Desarrollo Web Estratégico ←
+            </a>
+        </footer>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        /* ==========================================================================
+           A. MOTOR DE AUDIO SINTETIZADO (WEB AUDIO API - SIN ARCHIVOS EXTERNOS)
+           ========================================================================== */
+        const SoundFX = (() => {
+            let ctx = null;
+            let enabled = true;
+
+            function init() {
+                if (!ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) ctx = new AudioCtx();
+                }
+                if (ctx && ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+            }
+
+            function playTone(freq, type = 'sine', duration = 0.14, gainVal = 0.08, delay = 0) {
+                if (!enabled) return;
+                init();
+                if (!ctx) return;
+
+                const now = ctx.currentTime + delay;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, now);
+
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(gainVal, now + 0.015);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + duration + 0.02);
+            }
+
+            return {
+                isEnabled: () => enabled,
+                toggle: () => {
+                    enabled = !enabled;
+                    if (enabled) playTone(523.25, 'sine', 0.12, 0.07);
+                    return enabled;
+                },
+                click: () => playTone(440, 'sine', 0.07, 0.045),
+                tick: () => playTone(620, 'triangle', 0.04, 0.025),
+                flip: () => {
+                    playTone(330, 'sine', 0.08, 0.05, 0);
+                    playTone(495, 'sine', 0.09, 0.05, 0.05);
+                },
+                success: () => {
+                    playTone(523.25, 'sine', 0.16, 0.08, 0);
+                    playTone(659.25, 'sine', 0.16, 0.08, 0.09);
+                    playTone(783.99, 'sine', 0.25, 0.09, 0.18);
+                },
+                error: () => {
+                    playTone(240, 'sawtooth', 0.16, 0.05, 0);
+                    playTone(195, 'sawtooth', 0.22, 0.05, 0.12);
+                },
+                plant: () => {
+                    playTone(392, 'triangle', 0.14, 0.07, 0);
+                    playTone(493.88, 'triangle', 0.14, 0.07, 0.08);
+                    playTone(587.33, 'sine', 0.22, 0.08, 0.16);
+                    playTone(783.99, 'sine', 0.32, 0.09, 0.25);
+                },
+                fanfare: () => {
+                    [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
+                        playTone(f, 'triangle', 0.28, 0.08, i * 0.1);
+                    });
+                }
+            };
+        })();
+
+        /* ==========================================================================
+           B. RENDERIZADOR SVG REALISTA DE LAS FASES DE LA LUNA
+           ========================================================================== */
+        function createMoonSVG(phaseRatio, size = 120) {
+            // phaseRatio: 0.0 (Nueva) -> 0.25 (Cuarto Creciente) -> 0.5 (Llena) -> 0.75 (Cuarto Menguante) -> 1.0 (Nueva)
+            const p = ((phaseRatio % 1) + 1) % 1;
+            const r = 44;
+            const cx = 50;
+            const cy = 50;
+            const uid = 'm_' + Math.random().toString(36).substring(2, 9);
+
+            // Cálculo geométrico preciso del terminador lunar (vista Hemisferio Norte: ilumina de derecha a izquierda)
+            let litPath = '';
+            if (p <= 0.015 || p >= 0.985) {
+                // Luna Nueva (solo tenue brillo ceniciento)
+                litPath = '';
+            } else if (p >= 0.485 && p <= 0.515) {
+                // Luna Llena completa
+                litPath = `M ${cx},${cy - r} A ${r},${r} 0 1,1 ${cx},${cy + r} A ${r},${r} 0 1,1 ${cx},${cy - r} Z`;
+            } else if (p < 0.5) {
+                // Fase Creciente (lado derecho iluminado)
+                const rx = Math.abs(Math.cos(p * 2 * Math.PI)) * r;
+                const sweepInner = p < 0.25 ? 0 : 1;
+                litPath = `M ${cx},${cy - r} A ${r},${r} 0 0,1 ${cx},${cy + r} A ${rx},${r} 0 0,${sweepInner} ${cx},${cy - r} Z`;
+            } else {
+                // Fase Menguante (lado izquierdo iluminado)
+                const rx = Math.abs(Math.cos(p * 2 * Math.PI)) * r;
+                const sweepInner = p < 0.75 ? 1 : 0;
+                litPath = `M ${cx},${cy - r} A ${r},${r} 0 0,0 ${cx},${cy + r} A ${rx},${r} 0 0,${sweepInner} ${cx},${cy - r} Z`;
+            }
+
+            return `
+            <svg viewBox="0 0 100 100" width="${size}" height="${size}" style="display:block; margin:auto; overflow:visible;">
+                <defs>
+                    <radialGradient id="glow_${uid}" cx="50%" cy="50%" r="50%">
+                        <stop offset="70%" stop-color="#f5c35b" stop-opacity="0.28"/>
+                        <stop offset="100%" stop-color="#f5c35b" stop-opacity="0"/>
+                    </radialGradient>
+                    <radialGradient id="litGrad_${uid}" cx="38%" cy="35%" r="65%">
+                        <stop offset="0%" stop-color="#fffdf7"/>
+                        <stop offset="65%" stop-color="#f2e6cf"/>
+                        <stop offset="100%" stop-color="#d4c3a3"/>
+                    </radialGradient>
+                    <clipPath id="clip_${uid}">
+                        <circle cx="${cx}" cy="${cy}" r="${r}"/>
+                    </clipPath>
+                </defs>
+                <!-- Halo atmosférico sutil -->
+                <circle cx="${cx}" cy="${cy}" r="49" fill="url(#glow_${uid})"/>
+                <!-- Disco en sombra (luz cenicienta) -->
+                <circle cx="${cx}" cy="${cy}" r="${r}" fill="#131933" stroke="rgba(245,195,91,0.35)" stroke-width="1"/>
+                <!-- Mares y cráteres sutiles en sombra -->
+                <g clip-path="url(#clip_${uid})" opacity="0.22" fill="#090d1c">
+                    <circle cx="38" cy="36" r="11"/>
+                    <circle cx="58" cy="42" r="9"/>
+                    <circle cx="46" cy="60" r="13"/>
+                    <circle cx="64" cy="62" r="7"/>
+                </g>
+                <!-- Región iluminada por el Sol -->
+                ${litPath ? `<path d="${litPath}" fill="url(#litGrad_${uid})"/>` : ''}
+                <!-- Textura de mares lunares sobre la zona iluminada -->
+                ${litPath ? `
+                <g clip-path="url(#clip_${uid})">
+                    <path d="${litPath}" fill="none"/>
+                    <g opacity="0.16" fill="#7c725e">
+                        <ellipse cx="40" cy="38" rx="10" ry="8" transform="rotate(-15 40 38)"/>
+                        <ellipse cx="57" cy="40" rx="8" ry="7"/>
+                        <ellipse cx="48" cy="58" rx="12" ry="9"/>
+                        <circle cx="65" cy="55" r="5"/>
+                        <circle cx="34" cy="55" r="4"/>
+                    </g>
+                </g>` : ''}
+            </svg>`;
+        }
+
+        /* ==========================================================================
+           C. BASE DE DATOS CIENTÍFICA Y AGRÍCOLA DE LAS 8 FASES LUNARES
+           ========================================================================== */
+        const LUNAR_PHASES = [
+            {
+                id: 0,
+                name: "Luna Nueva",
+                shortName: "Nueva",
+                dayCenter: 0.0,
+                dayRange: [0, 1.85],
+                ratio: 0.0,
+                illumination: "0% – 2%",
+                tideType: "Mareas Vivas (Sicigia)",
+                astronomy: "La Luna se sitúa en conjunción entre la Tierra y el Sol, presentando su cara no iluminada hacia nosotros. La alineación gravitacional Sol-Tierra-Luna suma sus fuerzas de atracción, generando mareas vivas de gran amplitud en los océanos.",
+                agriculture: "La savia desciende y se concentra intensamente en el sistema radicular. Es una etapa de reposo vegetativo aéreo, ideal para podas de limpieza o formación, eliminar malas hierbas, abonar el suelo y sembrar cultivos de raíz en terrenos secos.",
+                sapSummary: "Savia concentrada en las raíces; mínima actividad en hojas y tallos.",
+                body: "La ausencia de brillo lunar nocturno favorece la secreción natural de melatonina en la glándula pineal, facilitando un sueño profundo y reparador. En bienestar tradicional se asocia con introspección, descanso físico y renovación de hábitos.",
+                scienceNote: "Evidencia: La oscuridad nocturna máxima optimiza el ritmo circadiano y la síntesis de melatonina."
+            },
+            {
+                id: 1,
+                name: "Creciente Cóncava",
+                shortName: "Creciente",
+                dayCenter: 3.7,
+                dayRange: [1.85, 5.55],
+                ratio: 0.125,
+                illumination: "3% – 35%",
+                tideType: "Mareas Intermedias Descendentes",
+                astronomy: "La Luna se desplaza al este del Sol, mostrando un fino arco iluminado en su borde derecho (en el hemisferio norte) visible al atardecer. A menudo puede verse el 'brillo ceniciento', luz solar reflejada por la Tierra hacia la zona oscura lunar.",
+                agriculture: "La luz lunar comienza a incrementarse cada noche, estimulando gradualmente el ascenso de la savia desde las raíces hacia los tallos. Buen momento para preparar semilleros, germinar semillas y estimular el enraizamiento inicial.",
+                sapSummary: "La savia inicia su ascenso gradual desde la raíz hacia los brotes.",
+                body: "El aumento progresivo de la luminosidad vespertina y el reinicio del ciclo se relacionan en cronobiología con un ligero incremento en la activación metabólica. Ideal para retomar rutinas de ejercicio suave y planificación.",
+                scienceNote: "Observación: El fenómeno de luz cenicienta fue explicado por Leonardo da Vinci en el siglo XVI."
+            },
+            {
+                id: 2,
+                name: "Cuarto Creciente",
+                shortName: "Cuarto Crec.",
+                dayCenter: 7.4,
+                dayRange: [5.55, 9.25],
+                ratio: 0.25,
+                illumination: "50%",
+                tideType: "Mareas Muertas (Cuadratura)",
+                astronomy: "La Luna forma un ángulo de 90° (cuadratura) respecto al Sol y la Tierra. Vemos exactamente la mitad derecha de su disco iluminado desde el mediodía hasta la medianoche. Las fuerzas gravitacionales del Sol y la Luna se contrarrestan parcialmente, produciendo mareas muertas.",
+                agriculture: "La savia asciende con vigor por tallos y ramas, equilibrando el desarrollo entre raíz y follaje. Es la fase óptima para sembrar hortalizas de hoja y tallo (lechuga, espinaca, acelga, apio), realizar injertos y trasplantar.",
+                sapSummary: "Savia subiendo activamente hacia tallos, ramas y hojas nuevas.",
+                body: "Los estudios sobre ritmos biológicos señalan una etapa de transición energética. En prácticas de cuidado personal se aprovecha para hidratación profunda de la piel y cortes de cabello cuando se busca estimular un crecimiento rápido.",
+                scienceNote: "Física orbital: En cuadratura, la atracción solar y lunar forman un ángulo recto."
+            },
+            {
+                id: 3,
+                name: "Gibosa Creciente",
+                shortName: "Gibosa Crec.",
+                dayCenter: 11.1,
+                dayRange: [9.25, 12.95],
+                ratio: 0.375,
+                illumination: "65% – 96%",
+                tideType: "Mareas en Ascenso",
+                astronomy: "Más de la mitad del disco lunar aparece iluminado y continúa creciendo noche tras noche. Sale por la tarde y permanece brillante durante gran parte de la madrugada, permitiendo observar con claridad los relieves cercanos al terminador.",
+                agriculture: "La savia fluye abundantemente hacia la parte superior de las plantas, impulsando la floración y el llenado de frutos. Excelente momento para sembrar plantas que producen frutos sobre la tierra (tomate, calabaza, pimiento, legumbres).",
+                sapSummary: "Gran acumulación de savia en la copa, flores y frutos en desarrollo.",
+                body: "El aumento notable de brillo nocturno empieza a modular la latencia del sueño en personas sensibles a la luz ambiental. Se recomienda reducir pantallas azules antes de dormir para proteger la calidad del descanso.",
+                scienceNote: "Cronobiología: La exposición lumínica vespertina retrasa el reloj circadiano."
+            },
+            {
+                id: 4,
+                name: "Luna Llena",
+                shortName: "Luna Llena",
+                dayCenter: 14.76,
+                dayRange: [12.95, 16.6],
+                ratio: 0.5,
+                illumination: "98% – 100%",
+                tideType: "Mareas Vivas (Oposición)",
+                astronomy: "La Luna se encuentra en oposición al Sol (180°), mostrando toda su cara visible iluminada durante toda la noche. Al igual que en Luna Nueva, la alineación Sol-Tierra-Luna genera mareas vivas máximas en los océanos.",
+                agriculture: "La savia alcanza su máxima concentración en hojas, flores y frutos, aumentando su turgencia y contenido de agua y aceites esenciales. Es el momento ideal para cosechar frutos jugosos, flores y plantas medicinales o aromáticas; no se recomienda podar.",
+                sapSummary: "Máxima concentración de savia en frutos, flores y hojas.",
+                body: "Estudios científicos (como los de Cajochen et al., Current Biology) demuestran que alrededor de la Luna Llena el sueño profundo disminuye hasta un 30%, tarda más en conciliarse y bajan los niveles de melatonina nocturna, incluso en habitaciones oscuras.",
+                scienceNote: "Estudio clave: Cajochen et al. (2013) documentaron reducción del sueño delta y melatonina en plenilunio."
+            },
+            {
+                id: 5,
+                name: "Gibosa Menguante",
+                shortName: "Gibosa Meng.",
+                dayCenter: 18.45,
+                dayRange: [16.6, 20.3],
+                ratio: 0.625,
+                illumination: "96% – 65%",
+                tideType: "Mareas en Descenso",
+                astronomy: "Tras el plenilunio, la sombra comienza a avanzar desde el borde derecho hacia el izquierdo. La Luna sale más tarde cada noche, brillando con intensidad durante la madrugada y primeras horas de la mañana.",
+                agriculture: "La savia inicia su retorno paulatino desde la copa y frutos hacia los tallos y raíces. Es una fase muy favorable para el trasplante de árboles o arbustos, ya que la planta sufre menos estrés hídrico y enraíza con mayor facilidad.",
+                sapSummary: "La savia comienza a descender desde la copa hacia el tronco y raíces.",
+                body: "A medida que disminuye el brillo nocturno en las primeras horas de la noche, se facilita la recuperación del sueño profundo. En bienestar se asocia con liberación de tensión acumulada y enfoque mental.",
+                scienceNote: "Astronomía: En esta fase la Luna es claramente visible en el cielo matutino."
+            },
+            {
+                id: 6,
+                name: "Cuarto Menguante",
+                shortName: "Cuarto Meng.",
+                dayCenter: 22.15,
+                dayRange: [20.3, 24.0],
+                ratio: 0.75,
+                illumination: "50%",
+                tideType: "Mareas Muertas (Cuadratura)",
+                astronomy: "La Luna alcanza su segunda cuadratura (270°), mostrando iluminada exactamente la mitad izquierda de su disco desde la medianoche hasta el amanecer. Se producen nuevamente mareas muertas por la geometría perpendicular con el Sol.",
+                agriculture: "La savia se dirige con fuerza hacia el subsuelo. Es la fase reina para sembrar hortalizas de raíz y tubérculos (zanahoria, papa, remolacha, ajo, cebolla), así como para fertilizar profundamente y controlar plagas del suelo.",
+                sapSummary: "Descenso marcado de la savia hacia bulbos, tubérculos y raíces.",
+                body: "Fase asociada fisiológicamente con estabilidad del descanso nocturno. En tradiciones de cuidado personal se elige para depuración, exfoliación y cortes de cabello cuando se busca fortalecer la raíz y mantener el largo por más tiempo.",
+                scienceNote: "Agronomía tradicional: El menor flujo aéreo reduce la pérdida de savia en cortes."
+            },
+            {
+                id: 7,
+                name: "Menguante Cóncava",
+                shortName: "Menguante",
+                dayCenter: 25.85,
+                dayRange: [24.0, 29.53],
+                ratio: 0.875,
+                illumination: "35% – 3%",
+                tideType: "Mareas Preparándose para Sicigia",
+                astronomy: "Solo queda una delgada hoz iluminada en el borde izquierdo visible antes del amanecer, acercándose nuevamente a la conjunción solar para completar los 29.53 días del mes sinódico.",
+                agriculture: "La actividad de la savia en la parte aérea es mínima y se concentra en las raíces. Momento excelente para cosechar raíces y tubérculos destinados a almacenamiento prolongado (se conservan mejor por tener menor agua superficial) y limpiar el huerto.",
+                sapSummary: "Mínima savia aérea; ideal para cosechar raíces de guarda y podar.",
+                body: "Las noches vuelven a ser oscuras, favoreciendo la máxima producción de melatonina y la reparación celular durante el sueño. Excelente etapa para el descanso, la meditación y la recuperación física.",
+                scienceNote: "Ciclo sinódico: Completa el retorno a la conjunción Sol-Tierra-Luna."
+            }
+        ];
+
+        function getPhaseFromDay(day) {
+            const d = ((day % 29.53) + 29.53) % 29.53;
+            for (const p of LUNAR_PHASES) {
+                if (d >= p.dayRange[0] && d < p.dayRange[1]) return p;
+            }
+            return LUNAR_PHASES[0];
+        }
+
+        /* ==========================================================================
+           D. GESTIÓN DE TEMA, ESTRELLAS, MEDALLAS Y NAVEGACIÓN
+           ========================================================================== */
+        const state = {
+            medals: JSON.parse(localStorage.getItem('lunarMedals') || '{}')
+        };
+
+        function unlockMedal(key) {
+            if (!state.medals[key]) {
+                state.medals[key] = true;
+                localStorage.setItem('lunarMedals', JSON.stringify(state.medals));
+                updateMedalUI();
+                SoundFX.fanfare();
+            }
+        }
+
+        function updateMedalUI() {
+            const keys = ['quiz', 'memorama', 'orden', 'huerto', 'cuerpo', 'sopa'];
+            let count = 0;
+            keys.forEach(k => {
+                const dot = document.getElementById(`dot-${k}`);
+                if (state.medals[k]) {
+                    count++;
+                    if (dot) dot.style.display = 'inline-block';
+                }
+            });
+            document.getElementById('medalCount').textContent = `${count} / 6`;
+        }
+
+        // Inicializar icono de encabezado
+        document.getElementById('headerMoonIcon').innerHTML = createMoonSVG(0.35, 48);
+
+        // Tema Claro / Nocturno
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        function applyTheme(isLight) {
+            document.body.classList.toggle('light-mode', isLight);
+            document.getElementById('themeIcon').textContent = isLight ? '🌙' : '☀️';
+            document.getElementById('themeLabel').textContent = isLight ? 'Modo Nocturno' : 'Modo Claro';
+            localStorage.setItem('lunarTheme', isLight ? 'light' : 'dark');
+        }
+        applyTheme(localStorage.getItem('lunarTheme') === 'light');
+
+        themeToggleBtn.addEventListener('click', () => {
+            SoundFX.click();
+            const isLight = !document.body.classList.contains('light-mode');
+            applyTheme(isLight);
+        });
+
+        // Control de Sonido
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+        soundToggleBtn.addEventListener('click', () => {
+            const on = SoundFX.toggle();
+            document.getElementById('soundIcon').textContent = on ? '🔊' : '🔇';
+            document.getElementById('soundLabel').textContent = on ? 'Sonido' : 'Silencio';
+        });
+
+        // Navegación entre paneles
+        document.querySelectorAll('.nav-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                SoundFX.click();
+                const target = tab.dataset.panel;
+                document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(`panel-${target}`).classList.add('active');
+            });
+        });
+
+        // Campo de estrellas animado en canvas
+        (function initStarfield() {
+            const canvas = document.getElementById('starfield');
+            const ctx = canvas.getContext('2d');
+            let stars = [];
+
+            function resize() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                stars = Array.from({ length: 95 }, () => ({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    r: Math.random() * 1.6 + 0.4,
+                    alpha: Math.random(),
+                    speed: Math.random() * 0.015 + 0.004
+                }));
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (const s of stars) {
+                    s.alpha += s.speed;
+                    const opacity = 0.25 + Math.abs(Math.sin(s.alpha)) * 0.75;
+                    ctx.beginPath();
+                    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(245, 235, 205, ${opacity})`;
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+
+            window.addEventListener('resize', resize);
+            resize();
+            draw();
+        })();
+
+        /* ==========================================================================
+           E. SECCIÓN 1: EXPLORADOR ORBITAL Y ENCICLOPEDIA
+           ========================================================================== */
+        const cycleSlider = document.getElementById('cycleSlider');
+        const explorerPhasePills = document.getElementById('explorerPhasePills');
+        let lastSoundStep = -1;
+
+        function renderExplorerPills() {
+            explorerPhasePills.innerHTML = '';
+            LUNAR_PHASES.forEach(p => {
+                const btn = document.createElement('button');
+                btn.className = 'phase-pill';
+                btn.dataset.phaseId = p.id;
+                btn.innerHTML = `${createMoonSVG(p.ratio, 34)}<span>${p.shortName}</span>`;
+                btn.addEventListener('click', () => {
+                    SoundFX.click();
+                    cycleSlider.value = p.dayCenter;
+                    updateExplorerView(p.dayCenter);
+                });
+                explorerPhasePills.appendChild(btn);
+            });
+        }
+
+        function updateExplorerView(dayVal) {
+            const day = parseFloat(dayVal);
+            const ratio = (day / 29.53) % 1;
+            const illumPct = Math.round(((1 - Math.cos(ratio * 2 * Math.PI)) / 2) * 100);
+            const angleDeg = Math.round(ratio * 360);
+            const currentPhase = getPhaseFromDay(day);
+
+            // Actualizar textos del slider
+            document.getElementById('sliderDayVal').textContent = day.toFixed(1);
+            document.getElementById('sliderIllumVal').textContent = `${illumPct}%`;
+            document.getElementById('liveAngleText').textContent = `Elongación: ${angleDeg}° • Edad: ${day.toFixed(1)} d`;
+
+            // Actualizar SVG de vista desde la Tierra
+            document.getElementById('liveMoonSvgContainer').innerHTML = createMoonSVG(ratio, 140);
+
+            // Actualizar posición orbital (Sol está a la izquierda = ángulo PI rad)
+            const orbitAngle = Math.PI - (ratio * 2 * Math.PI);
+            const orbitRadius = 68;
+            const mx = 145 + Math.cos(orbitAngle) * orbitRadius;
+            const my = 105 + Math.sin(orbitAngle) * orbitRadius;
+            document.getElementById('orbitMoonGroup').setAttribute('transform', `translate(${mx.toFixed(1)}, ${my.toFixed(1)})`);
+
+            // Actualizar elipse de mareas (más alargada en Nueva y Llena)
+            const springFactor = Math.abs(Math.cos(ratio * 2 * Math.PI)); // 1 en Nueva/Llena, 0 en Cuartos
+            const rx = 22 + springFactor * 10;
+            const ry = 25 - springFactor * 5;
+            const tideEl = document.getElementById('tideEllipse');
+            tideEl.setAttribute('rx', rx.toFixed(1));
+            tideEl.setAttribute('ry', ry.toFixed(1));
+
+            // Resaltar píldora activa
+            document.querySelectorAll('#explorerPhasePills .phase-pill').forEach(btn => {
+                btn.classList.toggle('active', parseInt(btn.dataset.phaseId) === currentPhase.id);
+            });
+
+            // Actualizar ficha enciclopédica
+            document.getElementById('encyclopediaContent').innerHTML = `
+                <div class="phase-title-banner">
+                    <div>
+                        <h3>${currentPhase.name}</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Días ${currentPhase.dayRange[0].toFixed(1)} – ${currentPhase.dayRange[1].toFixed(1)} del ciclo sinódico</p>
+                    </div>
+                    <div class="metrics-row">
+                        <span class="metric-chip">💡 Iluminación: ${currentPhase.illumination}</span>
+                        <span class="metric-chip">🌊 ${currentPhase.tideType}</span>
+                    </div>
+                </div>
+
+                <div class="pillar-box">
+                    <h4>🔭 1. Astronomía y Gravedad</h4>
+                    <p>${currentPhase.astronomy}</p>
+                </div>
+
+                <div class="pillar-box agri">
+                    <h4>🌱 2. Agricultura y Dinámica de la Savia</h4>
+                    <p>${currentPhase.agriculture}</p>
+                </div>
+
+                <div class="pillar-box body">
+                    <h4>🧘 3. Cronobiología y Bienestar Humano</h4>
+                    <p>${currentPhase.body}</p>
+                    <div class="science-note">📚 ${currentPhase.scienceNote}</div>
+                </div>
+            `;
+        }
+
+        cycleSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            const step = Math.floor(val * 2);
+            if (step !== lastSoundStep) {
+                SoundFX.tick();
+                lastSoundStep = step;
+            }
+            updateExplorerView(val);
+        });
+
+        renderExplorerPills();
+        updateExplorerView(0);
+
+        /* ==========================================================================
+           F. MODO 1: QUIZ ASTRONÓMICO Y BIO-LUNAR (12 PREGUNTAS)
+           ========================================================================== */
+        const QUIZ_BANK = [
+            {
+                cat: "Astronomía",
+                q: "¿Cuánto dura exactamente un ciclo sinódico lunar completo (de Luna Nueva a Luna Nueva)?",
+                opts: ["29.53 días", "27.32 días", "30.00 días", "28.00 días"],
+                ans: 0,
+                exp: "El mes sinódico dura 29.53 días porque la Tierra también avanza en su órbita alrededor del Sol y la Luna necesita 2.2 días extra para volver a alinearse."
+            },
+            {
+                cat: "Astronomía y Mareas",
+                q: "¿En qué dos fases lunares se producen las 'mareas vivas' de mayor amplitud?",
+                opts: ["Cuarto Creciente y Cuarto Menguante", "Luna Nueva y Luna Llena", "Gibosa Creciente y Menguante", "Solo en Luna Llena"],
+                ans: 1,
+                exp: "En Luna Nueva (conjunción) y Luna Llena (oposición), el Sol, la Tierra y la Luna están alineados, sumando sus fuerzas gravitacionales."
+            },
+            {
+                cat: "Agricultura Lunar",
+                q: "¿En qué fase lunar la savia se concentra más en las raíces, favoreciendo la siembra de zanahoria, papa y ajo?",
+                opts: ["Luna Llena", "Cuarto Menguante", "Gibosa Creciente", "Cuarto Creciente"],
+                ans: 1,
+                exp: "Durante el Cuarto Menguante la savia desciende hacia el subsuelo, fortaleciendo el desarrollo de bulbos, tubérculos y raíces."
+            },
+            {
+                cat: "Cronobiología",
+                q: "Según estudios de cronobiología (como Cajochen et al.), ¿qué ocurre con el sueño humano alrededor de la Luna Llena?",
+                opts: ["Aumenta el sueño profundo un 40%", "Disminuye el sueño profundo y baja la melatonina", "No cambia ningún parámetro fisiológico", "Se duerme 2 horas más rápido"],
+                ans: 1,
+                exp: "Investigaciones controladas muestran que en los días cercanos al plenilunio disminuye el sueño profundo (ondas delta), aumenta el tiempo para dormirse y bajan los niveles de melatonina."
+            },
+            {
+                cat: "Agricultura Lunar",
+                q: "¿Qué fase ofrece la mayor concentración de savia en frutos, flores y hojas para cosechar plantas medicinales y frutos jugosos?",
+                opts: ["Luna Nueva", "Menguante Cóncava", "Luna Llena", "Cuarto Menguante"],
+                ans: 2,
+                exp: "En Luna Llena la savia alcanza su punto máximo en la parte aérea de la planta, potenciando el aroma, jugosidad y aceites esenciales."
+            },
+            {
+                cat: "Astronomía",
+                q: "¿Qué porcentaje de la superficie visible de la Luna está iluminada durante el Cuarto Creciente y el Cuarto Menguante?",
+                opts: ["25%", "50%", "75%", "100%"],
+                ans: 1,
+                exp: "Se llaman 'Cuartos' porque la Luna ha recorrido un cuarto (25%) o tres cuartos (75%) de su órbita, pero desde la Tierra vemos iluminado el 50% de su disco."
+            },
+            {
+                cat: "Agricultura Lunar",
+                q: "¿Cuándo conviene sembrar hortalizas de hoja como lechuga, espinaca y acelga, o realizar injertos?",
+                opts: ["Cuarto Creciente", "Luna Nueva", "Menguante Cóncava", "Justo antes de heladas"],
+                ans: 0,
+                exp: "En Cuarto Creciente la savia asciende con fuerza hacia tallos y hojas, favoreciendo un follaje tierno y vigoroso."
+            },
+            {
+                cat: "Astronomía",
+                q: "¿Cómo se llama el tenue brillo que permite ver la parte oscura de la Luna durante la Creciente Cóncava?",
+                opts: ["Eclipse penumbral", "Luz cenicienta (brillo de la Tierra)", "Corona lunar", "Refracción solar"],
+                ans: 1,
+                exp: "La luz cenicienta es la luz del Sol reflejada por los océanos y nubes de la Tierra que ilumina suavemente la cara nocturna de la Luna."
+            },
+            {
+                cat: "Bienestar y Sueño",
+                q: "¿Por qué la Luna Nueva y la Menguante Cóncava favorecen una mayor producción de melatonina nocturna?",
+                opts: ["Por mayor gravedad en el cerebro", "Por la máxima oscuridad nocturna natural", "Porque la Luna desaparece de órbita", "Por aumento de oxígeno nocturno"],
+                ans: 1,
+                exp: "La glándula pineal secreta melatonina en respuesta a la oscuridad; las noches sin brillo lunar facilitan la sincronización circadiana."
+            },
+            {
+                cat: "Agricultura Lunar",
+                q: "¿Por qué se evita podar árboles frutales vigorosos durante la Luna Llena?",
+                opts: ["Porque las ramas se endurecen", "Porque el flujo alto de savia provoca mayor pérdida y estrés", "Porque no hay gravedad", "Porque las raíces se secan"],
+                ans: 1,
+                exp: "Al estar la savia concentrada en la copa y ramas, los cortes en Luna Llena 'lloran' más savia y quedan más expuestos a hongos."
+            },
+            {
+                cat: "Astronomía",
+                q: "¿Qué nombre reciben las mareas de menor amplitud que ocurren en Cuarto Creciente y Cuarto Menguante?",
+                opts: ["Mareas vivas", "Mareas muertas", "Mareas rojas", "Mareas de perigeo"],
+                ans: 1,
+                exp: "En cuadratura (90°), la atracción gravitacional del Sol y la Luna actúan en direcciones perpendiculares, suavizando el rango de marea."
+            },
+            {
+                cat: "Astronomía",
+                q: "¿Por qué siempre vemos aproximadamente la misma cara de la Luna desde la Tierra?",
+                opts: ["Porque la Luna no gira sobre su eje", "Por rotación síncrona (acoplamiento de marea)", "Porque el Sol siempre ilumina el mismo lado", "Por la atmósfera terrestre"],
+                ans: 1,
+                exp: "La Luna tarda exactamente lo mismo en rotar sobre su propio eje que en dar una vuelta alrededor de la Tierra (rotación síncrona)."
+            }
+        ];
+
+        let quizIdx = 0;
+        let quizScore = 0;
+        let quizStreak = 0;
+        let quizAnswered = false;
+        let activeQuestions = [];
+
+        function initQuiz() {
+            activeQuestions = [...QUIZ_BANK].sort(() => Math.random() - 0.5);
+            quizIdx = 0;
+            quizScore = 0;
+            quizStreak = 0;
+            renderQuizQuestion();
+        }
+
+        function renderQuizQuestion() {
+            quizAnswered = false;
+            document.getElementById('quizScoreDisplay').textContent = quizScore;
+            document.getElementById('quizStreakDisplay').textContent = `${quizStreak} 🔥`;
+            document.getElementById('quizNextBtn').style.display = 'none';
+            const fb = document.getElementById('quizFeedbackBox');
+            fb.classList.remove('show');
+
+            if (quizIdx >= activeQuestions.length) {
+                document.getElementById('quizProgress').textContent = `Completado`;
+                document.getElementById('quizCategory').textContent = "Resultados Finales";
+                document.getElementById('quizQuestionText').innerHTML = `🎉 ¡Completaste el Quiz Bio-Lunar con <strong>${quizScore} / ${activeQuestions.length}</strong> aciertos!`;
+                document.getElementById('quizOptionsGrid').innerHTML = '';
+                fb.innerHTML = quizScore >= 9
+                    ? "🏆 ¡Excelente dominio astronómico y agrícola! Has desbloqueado la medalla del Quiz Bio-Lunar."
+                    : "🌙 ¡Buen trabajo! Consigue al menos 9 aciertos para obtener la medalla dorada de esta sección.";
+                fb.classList.add('show');
+                if (quizScore >= 9) unlockMedal('quiz');
+                return;
+            }
+
+            const item = activeQuestions[quizIdx];
+            document.getElementById('quizProgress').textContent = `${quizIdx + 1} / ${activeQuestions.length}`;
+            document.getElementById('quizCategory').textContent = item.cat;
+            document.getElementById('quizQuestionText').textContent = item.q;
+
+            const grid = document.getElementById('quizOptionsGrid');
+            grid.innerHTML = '';
+            item.opts.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'quiz-opt-btn';
+                btn.innerHTML = `<span>${['A', 'B', 'C', 'D'][i]}.</span> <span>${optText}</span>`;
+                btn.addEventListener('click', () => handleQuizChoice(i, btn));
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleQuizChoice(selectedIdx, btnEl) {
+            if (quizAnswered) return;
+            quizAnswered = true;
+            const item = activeQuestions[quizIdx];
+            const buttons = document.querySelectorAll('.quiz-opt-btn');
+            buttons.forEach(b => b.disabled = true);
+
+            const fb = document.getElementById('quizFeedbackBox');
+            if (selectedIdx === item.ans) {
+                btnEl.classList.add('correct');
+                quizScore++;
+                quizStreak++;
+                SoundFX.success();
+                fb.innerHTML = `<strong style="color: var(--accent-emerald);">✅ ¡Correcto!</strong> ${item.exp}`;
+            } else {
+                btnEl.classList.add('wrong');
+                buttons[item.ans].classList.add('correct');
+                quizStreak = 0;
+                SoundFX.error();
+                fb.innerHTML = `<strong style="color: var(--accent-rose);">❌ Incorrecto.</strong> ${item.exp}`;
+            }
+
+            document.getElementById('quizScoreDisplay').textContent = quizScore;
+            document.getElementById('quizStreakDisplay').textContent = `${quizStreak} 🔥`;
+            fb.classList.add('show');
+            document.getElementById('quizNextBtn').style.display = 'inline-flex';
+        }
+
+        document.getElementById('quizNextBtn').addEventListener('click', () => {
+            SoundFX.click();
+            quizIdx++;
+            renderQuizQuestion();
+        });
+        document.getElementById('restartQuizBtn').addEventListener('click', () => {
+            SoundFX.click();
+            initQuiz();
+        });
+        initQuiz();
+
+        /* ==========================================================================
+           G. MODO 2: MEMORAMA LUNAR 3D
+           ========================================================================== */
+        let memoCards = [];
+        let memoFlipped = [];
+        let memoLock = false;
+        let memoPairs = 0;
+        let memoMoves = 0;
+        let memoSeconds = 0;
+        let memoTimerInterval = null;
+
+        function initMemorama() {
+            clearInterval(memoTimerInterval);
+            memoSeconds = 0;
+            memoMoves = 0;
+            memoPairs = 0;
+            memoFlipped = [];
+            memoLock = false;
+            document.getElementById('memoPairs').textContent = '0 / 8';
+            document.getElementById('memoMoves').textContent = '0';
+            document.getElementById('memoTimer').textContent = '00:00';
+            document.getElementById('memoVictoryBanner').classList.remove('show');
+
+            const deck = [];
+            LUNAR_PHASES.forEach(p => {
+                deck.push({ phaseId: p.id, kind: 'svg', phase: p });
+                deck.push({ phaseId: p.id, kind: 'text', phase: p });
+            });
+            deck.sort(() => Math.random() - 0.5);
+            memoCards = deck;
+
+            const grid = document.getElementById('memoGrid');
+            grid.innerHTML = '';
+            deck.forEach((card, idx) => {
+                const el = document.createElement('div');
+                el.className = 'memo-card';
+                el.dataset.idx = idx;
+                el.innerHTML = `
+                    <div class="memo-inner">
+                        <div class="memo-face memo-front">✦</div>
+                        <div class="memo-face memo-back">
+                            ${card.kind === 'svg'
+                                ? `${createMoonSVG(card.phase.ratio, 68)}<span class="memo-back-sub">Ilum. ${card.phase.illumination}</span>`
+                                : `<span class="memo-back-title">${card.phase.name}</span><span class="memo-back-sub">${card.phase.sapSummary.split(';')[0]}</span>`
+                            }
+                        </div>
+                    </div>
+                `;
+                el.addEventListener('click', () => flipMemoCard(el, idx));
+                grid.appendChild(el);
+            });
+
+            memoTimerInterval = setInterval(() => {
+                memoSeconds++;
+                const m = String(Math.floor(memoSeconds / 60)).padStart(2, '0');
+                const s = String(memoSeconds % 60).padStart(2, '0');
+                document.getElementById('memoTimer').textContent = `${m}:${s}`;
+            }, 1000);
+        }
+
+        function flipMemoCard(el, idx) {
+            if (memoLock || el.classList.contains('flipped') || el.classList.contains('matched')) return;
+            SoundFX.flip();
+            el.classList.add('flipped');
+            memoFlipped.push({ el, idx, card: memoCards[idx] });
+
+            if (memoFlipped.length === 2) {
+                memoLock = true;
+                memoMoves++;
+                document.getElementById('memoMoves').textContent = memoMoves;
+                const [a, b] = memoFlipped;
+
+                if (a.card.phaseId === b.card.phaseId) {
+                    setTimeout(() => {
+                        a.el.classList.add('matched');
+                        b.el.classList.add('matched');
+                        memoPairs++;
+                        document.getElementById('memoPairs').textContent = `${memoPairs} / 8`;
+                        memoFlipped = [];
+                        memoLock = false;
+                        SoundFX.success();
+
+                        if (memoPairs === 8) {
+                            clearInterval(memoTimerInterval);
+                            const banner = document.getElementById('memoVictoryBanner');
+                            banner.innerHTML = `🏆 ¡Memorama completado en <strong>${memoMoves} movimientos</strong> y <strong>${document.getElementById('memoTimer').textContent}</strong>! Medalla desbloqueada.`;
+                            banner.classList.add('show');
+                            unlockMedal('memorama');
+                        }
+                    }, 350);
+                } else {
+                    setTimeout(() => {
+                        a.el.classList.remove('flipped');
+                        b.el.classList.remove('flipped');
+                        memoFlipped = [];
+                        memoLock = false;
+                        SoundFX.error();
+                    }, 850);
+                }
+            }
+        }
+
+        document.getElementById('resetMemoBtn').addEventListener('click', () => {
+            SoundFX.click();
+            initMemorama();
+        });
+        initMemorama();
+
+        /* ==========================================================================
+           H. MODO 3: ORDEN DEL CICLO LUNAR (DRAG & CLICK)
+           ========================================================================== */
+        let orderSlots = new Array(8).fill(null);
+        let orderBankItems = [];
+        let orderValidation = new Array(8).fill(null);
+
+        function initOrdenGame() {
+            orderSlots = new Array(8).fill(null);
+            orderValidation = new Array(8).fill(null);
+            orderBankItems = [...LUNAR_PHASES].sort(() => Math.random() - 0.5);
+            document.getElementById('ordenFeedback').classList.remove('show');
+            renderOrdenBoard();
+        }
+
+        function renderOrdenBoard() {
+            const slotsEl = document.getElementById('orderSlotsGrid');
+            slotsEl.innerHTML = '';
+            orderSlots.forEach((phase, idx) => {
+                const slot = document.createElement('div');
+                slot.className = 'order-slot' + (phase ? ' filled' : '');
+                if (orderValidation[idx] === true) slot.classList.add('valid');
+                if (orderValidation[idx] === false) slot.classList.add('invalid');
+
+                slot.innerHTML = `<span class="slot-num">#${idx + 1}</span>`;
+                if (phase) {
+                    slot.innerHTML += `${createMoonSVG(phase.ratio, 48)}<strong style="font-size:0.82rem; margin-top:4px;">${phase.name}</strong>`;
+                    slot.title = "Haz clic para devolver al banco";
+                    slot.addEventListener('click', () => {
+                        SoundFX.click();
+                        orderBankItems.push(phase);
+                        orderSlots[idx] = null;
+                        orderValidation.fill(null);
+                        renderOrdenBoard();
+                    });
+                } else {
+                    slot.innerHTML += `<span style="font-size:0.78rem; color:var(--text-muted);">Colocar fase ${idx + 1}</span>`;
+                }
+
+                // Soporte Drag & Drop
+                slot.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    slot.classList.add('drag-over');
+                });
+                slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+                slot.addEventListener('drop', e => {
+                    e.preventDefault();
+                    slot.classList.remove('drag-over');
+                    const phaseId = parseInt(e.dataTransfer.getData('text/plain'));
+                    placePhaseInSlot(phaseId, idx);
+                });
+
+                slotsEl.appendChild(slot);
+            });
+
+            const bankEl = document.getElementById('orderBank');
+            bankEl.innerHTML = '';
+            if (orderBankItems.length === 0) {
+                bankEl.innerHTML = `<span style="color: var(--text-muted); font-size: 0.88rem;">Todas las fases están colocadas. Presiona "Comprobar Orden".</span>`;
+            } else {
+                orderBankItems.forEach(phase => {
+                    const chip = document.createElement('div');
+                    chip.className = 'order-chip';
+                    chip.draggable = true;
+                    chip.innerHTML = `${createMoonSVG(phase.ratio, 28)}<span>${phase.name}</span>`;
+                    chip.addEventListener('dragstart', e => {
+                        e.dataTransfer.setData('text/plain', phase.id);
+                    });
+                    chip.addEventListener('click', () => {
+                        const emptyIdx = orderSlots.findIndex(s => s === null);
+                        if (emptyIdx !== -1) placePhaseInSlot(phase.id, emptyIdx);
+                    });
+                    bankEl.appendChild(chip);
+                });
+            }
+        }
+
+        function placePhaseInSlot(phaseId, targetSlotIdx) {
+            const bankIndex = orderBankItems.findIndex(p => p.id === phaseId);
+            if (bankIndex === -1) return;
+            SoundFX.flip();
+            const [picked] = orderBankItems.splice(bankIndex, 1);
+            if (orderSlots[targetSlotIdx] !== null) {
+                orderBankItems.push(orderSlots[targetSlotIdx]);
+            }
+            orderSlots[targetSlotIdx] = picked;
+            orderValidation.fill(null);
+            renderOrdenBoard();
+        }
+
+        document.getElementById('checkOrdenBtn').addEventListener('click', () => {
+            const fb = document.getElementById('ordenFeedback');
+            if (orderSlots.some(s => s === null)) {
+                SoundFX.error();
+                fb.innerHTML = "⚠️ Completa las 8 casillas antes de comprobar el orden.";
+                fb.classList.add('show');
+                return;
+            }
+            let allCorrect = true;
+            orderSlots.forEach((p, idx) => {
+                const ok = p.id === idx;
+                orderValidation[idx] = ok;
+                if (!ok) allCorrect = false;
+            });
+            renderOrdenBoard();
+
+            if (allCorrect) {
+                fb.innerHTML = "🏆 ¡Orden cronológico perfecto! Dominas el ciclo completo de 29.53 días. Medalla desbloqueada.";
+                fb.classList.add('show');
+                unlockMedal('orden');
+            } else {
+                SoundFX.error();
+                fb.innerHTML = "❌ Algunas fases no están en su posición correcta (marcadas en rojo). Haz clic sobre ellas para reubicarlas.";
+                fb.classList.add('show');
+            }
+        });
+
+        document.getElementById('hintOrdenBtn').addEventListener('click', () => {
+            SoundFX.click();
+            const fb = document.getElementById('ordenFeedback');
+            fb.innerHTML = "💡 <strong>Pista:</strong> Empieza en #1 con <em>Luna Nueva</em> (0%), llega a la mitad en #5 con <em>Luna Llena</em> (100%) y cierra en #8 con <em>Menguante Cóncava</em>.";
+            fb.classList.add('show');
+        });
+
+        document.getElementById('resetOrdenBtn').addEventListener('click', () => {
+            SoundFX.click();
+            initOrdenGame();
+        });
+        initOrdenGame();
+
+        /* ==========================================================================
+           I. MODO 4: HUERTO LUNAR (SIMULADOR DE CULTIVOS)
+           ========================================================================== */
+        const GARDEN_MISSIONS = [
+            {
+                emoji: "🥕",
+                title: "Siembra de Zanahorias, Papas y Rábanos",
+                desc: "Buscamos que la savia descienda con fuerza hacia el subsuelo para lograr raíces y tubérculos vigorosos.",
+                validPhaseIds: [6, 7], // Cuarto Menguante o Menguante Cóncava
+                successMsg: "¡Cosecha perfecta! En fase menguante la savia se concentra en las raíces, evitando que la planta se vaya en exceso de hojas."
+            },
+            {
+                emoji: "🥬",
+                title: "Siembra de Lechuga, Espinaca y Acelga",
+                desc: "Necesitamos estimular el ascenso de la savia hacia los tallos y hojas tiernas.",
+                validPhaseIds: [1, 2], // Creciente o Cuarto Creciente
+                successMsg: "¡Excelente! Durante la fase creciente la savia sube con vigor por los tallos, produciendo hojas grandes y tiernas."
+            },
+            {
+                emoji: "🍅",
+                title: "Siembra de Tomates, Calabazas y Pimientos",
+                desc: "Queremos un flujo ascendente intenso de savia hacia la parte aérea para impulsar floración y frutos.",
+                validPhaseIds: [2, 3], // Cuarto Creciente o Gibosa Creciente
+                successMsg: "¡Gran trabajo! La luz lunar en aumento y la savia en ascenso favorecen el desarrollo aéreo y el cuajado de frutos."
+            },
+            {
+                emoji: "🌿",
+                title: "Cosecha de Plantas Medicinales y Frutos Jugosos",
+                desc: "Es momento de recolectar manzanilla, albahaca y frutos en su punto máximo de savia y aceites esenciales.",
+                validPhaseIds: [4], // Luna Llena
+                successMsg: "¡Cosecha aromática! En Luna Llena la savia alcanza su máxima concentración en hojas, flores y frutos."
+            },
+            {
+                emoji: "✂️",
+                title: "Poda de Limpieza y Abonado Profundo",
+                desc: "Necesitamos podar ramas secas sin que el árbol pierda demasiada savia ni sufra estrés.",
+                validPhaseIds: [0, 7], // Luna Nueva o Menguante Cóncava
+                successMsg: "¡Poda impecable! Al estar la savia resguardada en las raíces, los cortes cicatrizan mejor y sin sangrado excesivo."
+            },
+            {
+                emoji: "🌳",
+                title: "Trasplante de Arbustos y Árboles Jóvenes",
+                desc: "Requerimos que la planta reduzca la transpiración aérea y enfoque su energía en enraizar en su nuevo sitio.",
+                validPhaseIds: [5, 6], // Gibosa Menguante o Cuarto Menguante
+                successMsg: "¡Trasplante exitoso! El descenso paulatino de la savia facilita el arraigo radicular."
+            }
+        ];
+
+        let gardenMissionIdx = 0;
+        let gardenSuccessCount = 0;
+        let gardenCompletedSet = new Set();
+
+        function renderGardenPills() {
+            const container = document.getElementById('gardenQuickPills');
+            container.innerHTML = '';
+            LUNAR_PHASES.forEach(p => {
+                const btn = document.createElement('button');
+                btn.className = 'phase-pill';
+                btn.innerHTML = `${createMoonSVG(p.ratio, 26)}<span>${p.shortName}</span>`;
+                btn.addEventListener('click', () => {
+                    SoundFX.click();
+                    document.getElementById('gardenSlider').value = p.dayCenter;
+                    updateGardenLunarDial(p.dayCenter);
+                });
+                container.appendChild(btn);
+            });
+        }
+
+        function updateGardenLunarDial(dayVal) {
+            const day = parseFloat(dayVal);
+            const ratio = (day / 29.53) % 1;
+            const illumPct = Math.round(((1 - Math.cos(ratio * 2 * Math.PI)) / 2) * 100);
+            const phase = getPhaseFromDay(day);
+
+            document.getElementById('gardenDayVal').textContent = day.toFixed(1);
+            document.getElementById('gardenIllumVal').textContent = `${illumPct}%`;
+            document.getElementById('gardenSelectedPhaseName').textContent = phase.name;
+            document.getElementById('gardenSapDesc').textContent = phase.sapSummary;
+            document.getElementById('gardenMoonSvg').innerHTML = createMoonSVG(ratio, 145);
+        }
+
+        function loadGardenMission() {
+            const m = GARDEN_MISSIONS[gardenMissionIdx];
+            const emojiEl = document.getElementById('cropVisualEmoji');
+            emojiEl.textContent = m.emoji;
+            emojiEl.classList.remove('bloom');
+            document.getElementById('cropTitle').textContent = m.title;
+            document.getElementById('cropDesc').textContent = m.desc;
+            document.getElementById('gardenFeedback').classList.remove('show');
+        }
+
+        document.getElementById('gardenSlider').addEventListener('input', e => {
+            updateGardenLunarDial(e.target.value);
+        });
+
+        document.getElementById('plantCropBtn').addEventListener('click', () => {
+            const day = parseFloat(document.getElementById('gardenSlider').value);
+            const selectedPhase = getPhaseFromDay(day);
+            const mission = GARDEN_MISSIONS[gardenMissionIdx];
+            const fb = document.getElementById('gardenFeedback');
+
+            if (mission.validPhaseIds.includes(selectedPhase.id)) {
+                SoundFX.plant();
+                document.getElementById('cropVisualEmoji').classList.add('bloom');
+                if (!gardenCompletedSet.has(gardenMissionIdx)) {
+                    gardenCompletedSet.add(gardenMissionIdx);
+                    gardenSuccessCount = gardenCompletedSet.size;
+                    document.getElementById('gardenScore').textContent = `${gardenSuccessCount} / 6`;
+                }
+
+                let extraMsg = '';
+                if (gardenSuccessCount === 6) {
+                    extraMsg = ' 🏆 ¡Completaste las 6 labores del Huerto Lunar! Medalla desbloqueada.';
+                    unlockMedal('huerto');
+                }
+
+                fb.innerHTML = `<strong style="color: var(--accent-emerald);">🌱 ¡Éxito en ${selectedPhase.name}!</strong> ${mission.successMsg}${extraMsg}`;
+                fb.classList.add('show');
+
+                setTimeout(() => {
+                    gardenMissionIdx = (gardenMissionIdx + 1) % GARDEN_MISSIONS.length;
+                    loadGardenMission();
+                }, 2600);
+            } else {
+                SoundFX.error();
+                fb.innerHTML = `<strong style="color: var(--accent-rose);">⚠️ Fase no óptima (${selectedPhase.name}):</strong> ${selectedPhase.sapSummary} Ajusta el ciclo lunar según la necesidad del cultivo.`;
+                fb.classList.add('show');
+            }
+        });
+
+        document.getElementById('resetGardenBtn').addEventListener('click', () => {
+            SoundFX.click();
+            gardenMissionIdx = 0;
+            gardenSuccessCount = 0;
+            gardenCompletedSet.clear();
+            document.getElementById('gardenScore').textContent = '0 / 6';
+            loadGardenMission();
+        });
+
+        renderGardenPills();
+        updateGardenLunarDial(0);
+        loadGardenMission();
+
+        /* ==========================================================================
+           J. MODO 5: CRONOBIOLOGÍA Y BIENESTAR HUMANO
+           ========================================================================== */
+        const BIO_SCENARIOS = [
+            {
+                title: "Supresión nocturna de melatonina y reducción del sueño profundo",
+                context: "Estudios de laboratorio demuestran que alrededor de esta fase las personas tardan más en conciliar el sueño y el sueño delta reparador disminuye hasta un 30% debido al pico de luminosidad nocturna.",
+                correctId: 4,
+                explanation: "En Luna Llena el brillo nocturno máximo y los ritmos circalunares reducen la secreción de melatonina y la profundidad del sueño."
+            },
+            {
+                title: "Máxima oscuridad nocturna y pico natural de melatonina",
+                context: "Al no haber luz lunar reflejada durante toda la noche, la glándula pineal alcanza su mayor eficiencia para inducir descanso profundo y reparación celular.",
+                correctId: 0,
+                explanation: "En Luna Nueva la cara iluminada apunta hacia el Sol, brindando noches oscuras ideales para el descanso circadiano."
+            },
+            {
+                title: "Mareas muertas en la costa por cuadratura gravitacional (90°) en ascenso",
+                context: "El Sol y la Luna forman un ángulo recto respecto a la Tierra mientras la Luna muestra la mitad derecha iluminada; etapa asociada en bienestar con activación e hidratación.",
+                correctId: 2,
+                explanation: "En Cuarto Creciente (90°) las fuerzas gravitacionales se compensan parcialmente, generando mareas muertas."
+            },
+            {
+                title: "Mareas muertas de cuadratura en descenso y estabilidad del sueño",
+                context: "Visible en la segunda mitad de la noche con su mitad izquierda iluminada; en cuidado personal se aprovecha para depuración y cortes de cabello que buscan fortalecer la raíz.",
+                correctId: 6,
+                explanation: "El Cuarto Menguante ocurre a los 270° del ciclo, con mareas muertas y descenso energético."
+            },
+            {
+                title: "Aparición del brillo ceniciento al atardecer y reinicio de rutinas",
+                context: "Un fino arco iluminado aparece tras la puesta de Sol acompañado del reflejo terrestre sobre la parte oscura de la Luna, marcando el inicio gradual de la activación vespertina.",
+                correctId: 1,
+                explanation: "La Creciente Cóncava marca el retorno de la luz lunar vespertina y el fenómeno de luz cenicienta."
+            },
+            {
+                title: "Último suspiro luminoso antes del amanecer y cierre del ciclo biológico",
+                context: "Noches muy oscuras ideales para meditación, descarga de estrés acumulado y recuperación física antes de reiniciar el ciclo sinódico de 29.53 días.",
+                correctId: 7,
+                explanation: "La Menguante Cóncava cierra el mes sinódico con mínima luminosidad nocturna."
+            }
+        ];
+
+        let bioIdx = 0;
+        let bioScore = 0;
+        let bioAnswered = false;
+
+        function initBioGame() {
+            bioIdx = 0;
+            bioScore = 0;
+            renderBioScenario();
+        }
+
+        function renderBioScenario() {
+            bioAnswered = false;
+            document.getElementById('bioScore').textContent = bioScore;
+            document.getElementById('nextBioBtn').style.display = 'none';
+            const fb = document.getElementById('bioFeedback');
+            fb.classList.remove('show');
+
+            if (bioIdx >= BIO_SCENARIOS.length) {
+                document.getElementById('bioProgress').textContent = 'Completado';
+                document.getElementById('bioScenarioTitle').textContent = `🎉 ¡Completaste Cronobiología con ${bioScore} / ${BIO_SCENARIOS.length} aciertos!`;
+                document.getElementById('bioScenarioContext').textContent = bioScore >= 5
+                    ? "🏆 ¡Excelente comprensión de los ritmos circalunares! Medalla desbloqueada."
+                    : "🌙 Consigue al menos 5 aciertos para obtener la medalla de Cronobiología.";
+                document.getElementById('bioChoicesGrid').innerHTML = '';
+                if (bioScore >= 5) unlockMedal('cuerpo');
+                return;
+            }
+
+            const sc = BIO_SCENARIOS[bioIdx];
+            document.getElementById('bioProgress').textContent = `${bioIdx + 1} / ${BIO_SCENARIOS.length}`;
+            document.getElementById('bioScenarioTitle').textContent = sc.title;
+            document.getElementById('bioScenarioContext').textContent = sc.context;
+
+            const grid = document.getElementById('bioChoicesGrid');
+            grid.innerHTML = '';
+            LUNAR_PHASES.forEach(p => {
+                const btn = document.createElement('button');
+                btn.className = 'bio-choice-btn';
+                btn.innerHTML = `${createMoonSVG(p.ratio, 46)}<span>${p.name}</span>`;
+                btn.addEventListener('click', () => handleBioChoice(p.id, btn));
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleBioChoice(phaseId, btnEl) {
+            if (bioAnswered) return;
+            bioAnswered = true;
+            const sc = BIO_SCENARIOS[bioIdx];
+            document.querySelectorAll('.bio-choice-btn').forEach(b => b.disabled = true);
+
+            const fb = document.getElementById('bioFeedback');
+            if (phaseId === sc.correctId) {
+                bioScore++;
+                btnEl.style.borderColor = 'var(--accent-emerald)';
+                btnEl.style.background = 'rgba(52, 211, 153, 0.2)';
+                SoundFX.success();
+                fb.innerHTML = `<strong style="color: var(--accent-emerald);">✅ ¡Correcto!</strong> ${sc.explanation}`;
+            } else {
+                btnEl.style.borderColor = 'var(--accent-rose)';
+                btnEl.style.background = 'rgba(251, 113, 133, 0.2)';
+                SoundFX.error();
+                fb.innerHTML = `<strong style="color: var(--accent-rose);">❌ No exactamente.</strong> La respuesta correcta es <strong>${LUNAR_PHASES[sc.correctId].name}</strong>. ${sc.explanation}`;
+            }
+
+            document.getElementById('bioScore').textContent = bioScore;
+            fb.classList.add('show');
+            document.getElementById('nextBioBtn').style.display = 'inline-flex';
+        }
+
+        document.getElementById('nextBioBtn').addEventListener('click', () => {
+            SoundFX.click();
+            bioIdx++;
+            renderBioScenario();
+        });
+        document.getElementById('resetBioBtn').addEventListener('click', () => {
+            SoundFX.click();
+            initBioGame();
+        });
+        initBioGame();
+
+        /* ==========================================================================
+           K. MODO 6: SOPA DE LETRAS LUNAR (DRAG / CLICK H-V-D)
+           ========================================================================== */
+        const SOPA_WORDS = [
+            { word: "NUEVA", color: "#f5c35b", def: "Luna Nueva: Conjunción entre Tierra y Sol (0% iluminación). Savia en raíces y mareas vivas." },
+            { word: "CRECIENTE", color: "#34d399", def: "Fase Creciente: La iluminación aumenta noche tras noche y la savia asciende hacia tallos y hojas." },
+            { word: "CUARTO", color: "#60a5fa", def: "Cuarto Lunar: Ángulo de 90° (cuadratura) con el Sol; 50% de disco iluminado y mareas muertas." },
+            { word: "LLENA", color: "#fbbf24", def: "Luna Llena: Oposición solar (100% iluminación). Máxima savia en frutos/flores y reducción de melatonina." },
+            { word: "GIBOSA", color: "#a78bfa", def: "Fase Gibosa: Cuando más del 50% del disco lunar está iluminado pero aún no llega al 100%." },
+            { word: "MENGUANTE", color: "#fb7185", def: "Fase Menguante: La iluminación disminuye y la savia desciende hacia bulbos y raíces." },
+            { word: "SAVIA", color: "#4ade80", def: "Savia Vegetal: Fluido nutritivo cuya circulación en las plantas responde a los ciclos de luz y humedad." },
+            { word: "MAREA", color: "#38bdf8", def: "Marea Oceánica: Ascenso y descenso del nivel del mar causado por la atracción gravitacional de la Luna y el Sol." }
+        ];
+
+        const GRID_SIZE = 10;
+        let sopaMatrix = [];
+        let sopaFoundWords = new Set();
+        let sopaFoundCells = new Map(); // "r,c" -> color
+        let isDraggingSopa = false;
+        let startCell = null;
+        let currentSelection = [];
+
+        function generateSopaBoard() {
+            sopaFoundWords.clear();
+            sopaFoundCells.clear();
+            currentSelection = [];
+            startCell = null;
+            sopaMatrix = Array.from({ length: GRID_SIZE }, () => Array(GRID_SIZE).fill(''));
+
+            const directions = [
+                [0, 1],  // Horizontal
+                [1, 0],  // Vertical
+                [1, 1]   // Diagonal
+            ];
+
+            // Ordenar palabras más largas primero para facilitar colocación
+            const sorted = [...SOPA_WORDS].sort((a, b) => b.word.length - a.word.length);
+
+            for (const item of sorted) {
+                const w = item.word;
+                let placed = false;
+                for (let attempt = 0; attempt < 250 && !placed; attempt++) {
+                    const [dr, dc] = directions[Math.floor(Math.random() * directions.length)];
+                    const maxR = dr === 0 ? GRID_SIZE - 1 : GRID_SIZE - w.length;
+                    const maxC = dc === 0 ? GRID_SIZE - 1 : GRID_SIZE - w.length;
+                    if (maxR < 0 || maxC < 0) continue;
+
+                    const r0 = Math.floor(Math.random() * (maxR + 1));
+                    const c0 = Math.floor(Math.random() * (maxC + 1));
+
+                    let fits = true;
+                    for (let k = 0; k < w.length; k++) {
+                        const existing = sopaMatrix[r0 + dr * k][c0 + dc * k];
+                        if (existing !== '' && existing !== w[k]) {
+                            fits = false;
+                            break;
+                        }
+                    }
+
+                    if (fits) {
+                        for (let k = 0; k < w.length; k++) {
+                            sopaMatrix[r0 + dr * k][c0 + dc * k] = w[k];
+                        }
+                        placed = true;
+                    }
+                }
+            }
+
+            const alphabet = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    if (sopaMatrix[r][c] === '') {
+                        sopaMatrix[r][c] = alphabet[Math.floor(Math.random() * alphabet.length)];
+                    }
+                }
+            }
+
+            renderSopaUI();
+        }
+
+        function getLineCells(r1, c1, r2, c2) {
+            const dr = r2 - r1;
+            const dc = c2 - c1;
+            const steps = Math.max(Math.abs(dr), Math.abs(dc));
+            if (steps === 0) return [{ r: r1, c: c1 }];
+
+            // Solo líneas rectas: horizontal, vertical o diagonal perfecta
+            if (dr !== 0 && dc !== 0 && Math.abs(dr) !== Math.abs(dc)) {
+                return [{ r: r1, c: c1 }];
+            }
+
+            const stepR = dr === 0 ? 0 : dr / Math.abs(dr);
+            const stepC = dc === 0 ? 0 : dc / Math.abs(dc);
+            const cells = [];
+            for (let i = 0; i <= steps; i++) {
+                cells.push({ r: r1 + stepR * i, c: c1 + stepC * i });
+            }
+            return cells;
+        }
+
+        function renderSopaUI() {
+            const board = document.getElementById('sopaBoard');
+            board.innerHTML = '';
+
+            for (let r = 0; r < GRID_SIZE; r++) {
+                for (let c = 0; c < GRID_SIZE; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'sopa-cell';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    cell.textContent = sopaMatrix[r][c];
+
+                    const key = `${r},${c}`;
+                    if (sopaFoundCells.has(key)) {
+                        cell.classList.add('found');
+                        cell.style.background = sopaFoundCells.get(key);
+                    }
+                    if (currentSelection.some(s => s.r === r && s.c === c)) {
+                        cell.classList.add('selecting');
+                    }
+
+                    board.appendChild(cell);
+                }
+            }
+
+            document.getElementById('sopaFoundCount').textContent = sopaFoundWords.size;
+            const chipsEl = document.getElementById('sopaWordChips');
+            chipsEl.innerHTML = '';
+            SOPA_WORDS.forEach(item => {
+                const chip = document.createElement('span');
+                chip.className = 'word-chip' + (sopaFoundWords.has(item.word) ? ' done' : '');
+                chip.textContent = item.word;
+                if (sopaFoundWords.has(item.word)) {
+                    chip.style.background = item.color;
+                }
+                chipsEl.appendChild(chip);
+            });
+        }
+
+        function evaluateSopaSelection() {
+            if (currentSelection.length < 2) return;
+            const str = currentSelection.map(pos => sopaMatrix[pos.r][pos.c]).join('');
+            const rev = str.split('').reverse().join('');
+
+            const match = SOPA_WORDS.find(item => !sopaFoundWords.has(item.word) && (item.word === str || item.word === rev));
+            if (match) {
+                sopaFoundWords.add(match.word);
+                currentSelection.forEach(pos => {
+                    sopaFoundCells.set(`${pos.r},${pos.c}`, match.color);
+                });
+                SoundFX.success();
+                const defBox = document.getElementById('sopaDefinitionBox');
+                defBox.innerHTML = `<strong style="color: var(--accent-emerald);">✨ ¡Encontraste ${match.word}!</strong><br>${match.def}`;
+
+                if (sopaFoundWords.size === SOPA_WORDS.length) {
+                    defBox.innerHTML += `<br><br>🏆 <strong>¡Completaste toda la Sopa Lunar! Medalla desbloqueada.</strong>`;
+                    unlockMedal('sopa');
+                }
+            }
+        }
+
+        // Eventos unificados de puntero (ratón y táctil) en la sopa de letras
+        const sopaBoardEl = document.getElementById('sopaBoard');
+        sopaBoardEl.addEventListener('pointerdown', e => {
+            const target = e.target.closest('.sopa-cell');
+            if (!target) return;
+            const r = parseInt(target.dataset.r);
+            const c = parseInt(target.dataset.c);
+
+            // Soporte tanto para clic inicio->fin como arrastre continuo
+            if (startCell && !isDraggingSopa) {
+                currentSelection = getLineCells(startCell.r, startCell.c, r, c);
+                evaluateSopaSelection();
+                startCell = null;
+                currentSelection = [];
+                renderSopaUI();
+                return;
+            }
+
+            isDraggingSopa = true;
+            startCell = { r, c };
+            currentSelection = [startCell];
+            SoundFX.tick();
+            renderSopaUI();
+        });
+
+        sopaBoardEl.addEventListener('pointermove', e => {
+            if (!isDraggingSopa || !startCell) return;
+            const el = document.elementFromPoint(e.clientX, e.clientY);
+            const target = el ? el.closest('.sopa-cell') : null;
+            if (!target) return;
+            const r = parseInt(target.dataset.r);
+            const c = parseInt(target.dataset.c);
+            currentSelection = getLineCells(startCell.r, startCell.c, r, c);
+            renderSopaUI();
+        });
+
+        window.addEventListener('pointerup', () => {
+            if (!isDraggingSopa) return;
+            isDraggingSopa = false;
+            if (currentSelection.length > 1) {
+                evaluateSopaSelection();
+                startCell = null;
+                currentSelection = [];
+                renderSopaUI();
+            }
+        });
+
+        document.getElementById('resetSopaBtn').addEventListener('click', () => {
+            SoundFX.click();
+            generateSopaBoard();
+            document.getElementById('sopaDefinitionBox').innerHTML = "💡 Encuentra una palabra en la cuadrícula para desbloquear su definición científica.";
+        });
+
+        generateSopaBoard();
+        updateMedalUI();
+    </script>
 </body>
 </html>
